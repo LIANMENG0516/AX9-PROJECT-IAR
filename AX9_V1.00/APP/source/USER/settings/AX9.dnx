@@ -16,7 +16,7 @@
         <ShowSource>1</ShowSource>
     </Trace1>
     <DebugChecksum>
-        <Checksum>2565591056</Checksum>
+        <Checksum>3919090790</Checksum>
     </DebugChecksum>
     <Disassembly>
         <MixedMode>1</MixedMode>
@@ -75,6 +75,9 @@
     <ArmDriver>
         <EnableCache>0</EnableCache>
     </ArmDriver>
+    <RecentFlashDownload>
+        <Path>C:\Users\LIANMENG\Desktop\AX9.hex</Path>
+    </RecentFlashDownload>
     <Trace2>
         <Enabled>0</Enabled>
         <ShowSource>0</ShowSource>

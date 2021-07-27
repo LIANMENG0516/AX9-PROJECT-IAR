@@ -136,11 +136,11 @@ void DebugMon_Handler(void)
   * @param  None
   * @retval None
   */
-#ifndef USE_UCOSIII
-void PendSV_Handler(void)
-{
-}
-#endif
+//#ifndef USE_UCOSIII
+//void PendSV_Handler(void)
+//{
+//}
+//#endif
 
 /**
   * @brief  This function handles SysTick Handler.
@@ -148,15 +148,18 @@ void PendSV_Handler(void)
   * @retval None
   */
 void SysTick_Handler(void)
-{
-#ifdef USE_UCOSIII
-    OSIntEnter();
-	OSTimeTick();
-	OSIntExit();
+{  
+    #ifdef USE_UCOSIII
+    if(OSRunning==1)
+    {
+        OSIntEnter();
+        OSTimeTick();
+        OSIntExit();
+    }
     TimingDelay_Decrement();
-#else
-	TimingDelay_Decrement();
-#endif	
+    #else
+    TimingDelay_Decrement();
+    #endif	
 }
 
 /**

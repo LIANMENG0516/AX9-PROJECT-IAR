@@ -23,9 +23,9 @@
 
 if ($debugfile -eq "")
 {
-& "D:\Program Files\IAR Systems\Embedded Workbench 9.0\common\bin\cspybat" -f "C:\Users\LIANMENG\Desktop\AX9 PROJECT\AX9_V1.00\APP\source\USER\settings\AX9.Debug.general.xcl" --backend -f "C:\Users\LIANMENG\Desktop\AX9 PROJECT\AX9_V1.00\APP\source\USER\settings\AX9.Debug.driver.xcl" 
+& "D:\Program Files\IAR Systems\Embedded Workbench 9.0\common\bin\cspybat" -f "C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR\AX9_V1.00\APP\source\USER\settings\AX9.Debug.general.xcl" --backend -f "C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR\AX9_V1.00\APP\source\USER\settings\AX9.Debug.driver.xcl" 
 }
 else
 {
-& "D:\Program Files\IAR Systems\Embedded Workbench 9.0\common\bin\cspybat" -f "C:\Users\LIANMENG\Desktop\AX9 PROJECT\AX9_V1.00\APP\source\USER\settings\AX9.Debug.general.xcl" --debug_file=$debugfile --backend -f "C:\Users\LIANMENG\Desktop\AX9 PROJECT\AX9_V1.00\APP\source\USER\settings\AX9.Debug.driver.xcl" 
+& "D:\Program Files\IAR Systems\Embedded Workbench 9.0\common\bin\cspybat" -f "C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR\AX9_V1.00\APP\source\USER\settings\AX9.Debug.general.xcl" --debug_file=$debugfile --backend -f "C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR\AX9_V1.00\APP\source\USER\settings\AX9.Debug.driver.xcl" 
 }

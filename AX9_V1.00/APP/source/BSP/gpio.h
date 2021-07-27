@@ -391,6 +391,11 @@
 #define SLEEP_LED_C_PIN           GPIO_Pin_4
 #define SLEEP_LED_EN(x)           x ? GPIO_SetBits(SLEEP_LED_C_PORT, SLEEP_LED_C_PIN) : GPIO_ResetBits(SLEEP_LED_C_PORT, SLEEP_LED_C_PIN)
 
+//AUDIO_MUTE
+#define AUDIO_MUTE_PORT          GPIOG
+#define AUDIO_MUTE_PIN           GPIO_Pin_6
+#define AUDIO_MUTE_EN(x)         x ? GPIO_SetBits(AUDIO_MUTE_PORT, AUDIO_MUTE_PIN) : GPIO_ResetBits(AUDIO_MUTE_PORT, AUDIO_MUTE_PIN)
+
 //TX7516
 #define TX7516_PORT               GPIOG
 #define TX7516_PIN                GPIO_Pin_7

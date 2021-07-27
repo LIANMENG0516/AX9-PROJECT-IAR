@@ -115,9 +115,7 @@ void I_AdcDma_Config()
 
 void Fan_Config()
 {
-    delay_os_lock();
     Fan_Emc2305_Init();
-    delay_os_unlock();
 }
 
 void Board_Bsp_Init()

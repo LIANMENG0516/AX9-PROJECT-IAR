@@ -11,8 +11,8 @@ CPU_STK App_SysOnOff_Task_Stk[APP_SYSONOFF_STK_SIZE];
 void PowerOn_Sequence()
 {
     OS_ERR err;
+    
     PWR_CTL(1);
-    PBUS_ON(1);
     OSTimeDly(2, OS_OPT_TIME_DLY, &err);
     CTL_P12V_EN(1);
     OSTimeDly(20, OS_OPT_TIME_DLY, &err);
@@ -65,9 +65,9 @@ void PowerDown_Sequence()
 
 void System_OnCtrl()
 {
-    OS_ERR err;
+    static uint16_t cnt = 0;
     
-    bool Pwr_OnSequence = FALSE; 
+    static bool Pwr_OnSequence = FALSE; 
     
     if(SysMsg.SystemState == SYSTEM_OFF)
     {
@@ -77,6 +77,7 @@ void System_OnCtrl()
             {
                 SysMsg.PowerOnReq = FALSE;
                 PWR_BTN_COM(0);
+                PBUS_ON(1);
             }
         }
         
@@ -99,26 +100,37 @@ void System_OnCtrl()
             else
             {
                 PowerDown_Sequence();
+                Pwr_OnSequence = FALSE;
             }
         }
         
         if(Pwr_OnSequence == TRUE)
         {
-            Pwr_OnSequence = FALSE;
-            if(!FPGA_CFG_DOWN_CHK())
+            if(FPGA_CFG_DOWN_CHK())
             {
-                OSTimeDly(3000, OS_OPT_TIME_DLY, &err);
+                cnt = 0;
+                Pwr_OnSequence = FALSE;
+                PWR_OK_COM(1);
+                TX7516_EN(1);
+                SysMsg.SystemState = SYSTEM_ON;
+                USB_CTRL_EN(1);
+                
             }
-            PWR_OK_COM(1);
-            TX7516_EN(1);
-
-            SysMsg.SystemState = SYSTEM_ON;
-            
-            USB_CTRL_EN(1);                                                             //使能USB插入
+            else
+            {
+                if(++cnt >= 300)
+                {
+                    cnt = 0;
+                    Pwr_OnSequence = FALSE;
+                    PWR_OK_COM(1);
+                    TX7516_EN(1);
+                    SysMsg.SystemState = SYSTEM_ON;
+                    USB_CTRL_EN(1);                                             //使能USB插入
+                }
+            }                                                        
             
             
             //调试固化高压发射为10V 5V           
-                        
             CTL_VPP1_VNN1_EN(0);                       //关闭高压输出
             CTL_VPP2_VNN2_EN(0);
 

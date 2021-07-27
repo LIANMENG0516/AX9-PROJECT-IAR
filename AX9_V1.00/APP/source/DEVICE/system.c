@@ -171,13 +171,13 @@ bool System_PwrKey_Minitor()
         SysMsg.KeyState = stateOld = stateNow;
         
         if(SysMsg.SystemState == SYSTEM_OFF)   //在关机状态下按下按键执行开机	
-		{
+        {
             SysMsg.PowerOnReq = TRUE;
-		}
+        }
         if(SysMsg.SystemState == SYSTEM_ON)    //在开机状态下按下按键发送关机请求, 使屏幕弹出关机对话框							
-		{
+        {
             SysMsg.ShutDownReq = TRUE;
-		}
+        }
         
         stateChange = TRUE;
     }
@@ -190,7 +190,7 @@ bool System_PwrKey_Minitor()
         stateNow = stateOld = FALSE;
     }
 
-	return stateChange;
+    return stateChange;
 }
 
 bool System_S3_State_Minitor()

@@ -56,34 +56,34 @@
 #define DEBUG_COMMAND                       1       //命令调试开关
 #define DEBUG_STRING                        0       //字符串调试开关
 
-#define APP_LED_TASK_PRIO 					3
+#define APP_LED_TASK_PRIO 					20
 #define APP_LED_STK_SIZE 					256
 
-#define APP_USB_TASK_PRIO 					4
+#define APP_USB_TASK_PRIO 					21
 #define APP_USB_STK_SIZE 					256
 
-#define APP_ADJVOL_TASK_PRIO                5
+#define APP_ADJVOL_TASK_PRIO                22
 #define APP_ADJVOL_STK_SIZE                 256
 
-#define APP_COM_TASK_PRIO                   6
+#define APP_COM_TASK_PRIO                   23
 #define APP_COM_STK_SIZE                    256
 
-#define APP_FAN_TASK_PRIO                   7
+#define APP_FAN_TASK_PRIO                   24
 #define APP_FAN_STK_SIZE                    256
 
-#define APP_SYSONOFF_TASK_PRIO              8
-#define APP_SYSONOFF_STK_SIZE               256
+#define APP_SYSONOFF_TASK_PRIO              25
+#define APP_SYSONOFF_STK_SIZE               512
 
-#define APP_TEMPERATURE_TASK_PRIO           9
+#define APP_TEMPERATURE_TASK_PRIO           26
 #define APP_TEMPERATURE_STK_SIZE            256
 
-#define APP_ADC_TASK_PRIO                   10
+#define APP_ADC_TASK_PRIO                   27
 #define APP_ADC_STK_SIZE                    256
 
-#define APP_PWRMANAGER_TASK_PRIO            11
+#define APP_PWRMANAGER_TASK_PRIO            28
 #define APP_PWRMANAGER_STK_SIZE             256
 
-#define APP_START_TASK_PRIO 				30		//优先级
+#define APP_START_TASK_PRIO 				29		//优先级
 #define APP_START_STK_SIZE 					256		//堆栈大小
 
 #endif

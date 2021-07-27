@@ -6,21 +6,21 @@ extern System_MsgStruct SysMsg;
 
 uint16_t Vppx_Calculate_AdjVol(uint16_t T_Data)
 {
-    double Adjvol;
+    float Adjvol;
     uint16_t Dac_Val;
     
     Adjvol = 2.096 - T_Data / 100 / 43.2;                                  //(1/43.2+1/3.48+1)*1.6=2.096
     Dac_Val = (int)((Adjvol / 3.3 * 4095)+ 0.5);
-    
+
     return Dac_Val;
 }
 
 uint16_t Vnnx_Calculate_AdjVol(uint16_t T_Data)
 {
-    double Adjvol;
+    float Adjvol;
     uint16_t Dac_Val;
     
-    Adjvol = 2.098 - 0.023 * T_Data / 100;    
+    Adjvol = 2.098 - ((0.023 * T_Data) / 100);    
     
     Dac_Val = ((int)(Adjvol * 4096 / 2.048)) >> 4;               //四舍五入后取整数
     
@@ -47,7 +47,7 @@ uint16_t Ncw_Calculate_AdjVol(uint16_t T_Data)
 
 void Adjust_Voltage_Vpp1(uint16_t T_Vpp1)
 {
-    uint16_t Dac_Val;
+    uint16_t Dac_Val = 0;
     
     Dac_Val = Vppx_Calculate_AdjVol(T_Vpp1);                         //计算要调节到目标值时HVADJ1的值
     DAC_SetChannel1Data(DAC_Align_12b_R, Dac_Val);                   //调节VPP1至目标值

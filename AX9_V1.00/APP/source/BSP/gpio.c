@@ -267,6 +267,10 @@ void Gpio_Config()
     //SLEEP_LED_C
     Gpio_Init(SLEEP_LED_C_PORT, SLEEP_LED_C_PIN, GPIO_Mode_OUT, GPIO_OType_PP, GPIO_PuPd_NOPULL);
     
+    //AUDIO_MUTE
+    Gpio_Init(AUDIO_MUTE_PORT, AUDIO_MUTE_PIN, GPIO_Mode_OUT, GPIO_OType_PP, GPIO_PuPd_NOPULL);
+    AUDIO_MUTE_EN(1);
+    
     //TX7516
     Gpio_Init(TX7516_PORT, TX7516_PIN, GPIO_Mode_OUT, GPIO_OType_PP, GPIO_PuPd_NOPULL);
     TX7516_EN(0);
