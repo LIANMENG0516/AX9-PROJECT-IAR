@@ -273,24 +273,8 @@ void Fan_Emc2305_Control()
     
     uint8_t Speed;
     
-    if(SysMsg.Temperature.CPU >= SysMsg.Temperature.FPGA)
-    {
-        TempNow = SysMsg.Temperature.CPU;
-    }
-    else
-    {
-        TempNow = SysMsg.Temperature.FPGA;
-    }
-    
-    if(TempNow >= SysMsg.Temperature.MCU)
-    {
-        TempNow = TempNow;
-    }
-    else
-    {
-        TempNow = SysMsg.Temperature.MCU;
-    }
-    
+    TempNow = SysMsg.Temperature.FPGA;
+        
     if(TempNow != TempOld)
     {
         TempOld = TempNow;

@@ -22,7 +22,7 @@ void App_Com_Task()
     OS_ERR err;
 
     while(1)
-    {				
+    {		
         if(ReceiveFrameAnalysis(&CommuComRX.Data[0], CommuComRX.Len) == SUCCESS)   //格式化并解析串口数据
         {
             SysMsg.Cmd.Channel = ECCOM_CHANNEL;
@@ -86,12 +86,12 @@ void App_Com_Task()
                 FrameCmdPackage(DebugComTX.Data);
                 Send_CmdPackage(DEBUG_COM_DMAY_STREAMX_TX); 
                 
-                SysMsg.AdjVol.TimeFlag = FALSE;
-                SysMsg.AdjVol.Time = 0;
-
                 #endif
                 
-                DEBUG_PRINTF(DEBUG_STRING, "Voltage : %d %d %d %d \r\n", SysMsg.AdjVol.R_VPP1, SysMsg.AdjVol.R_VNN1, SysMsg.AdjVol.R_VPP2, SysMsg.AdjVol.R_VNN2);            
+                SysMsg.AdjVol.TimeFlag = FALSE;
+                SysMsg.AdjVol.Time = 0;
+                
+                DEBUG_PRINTF(DEBUG_STRING, "HV Send Voltage : %d %d %d %d \r\n", SysMsg.AdjVol.R_VPP1, SysMsg.AdjVol.R_VNN1, SysMsg.AdjVol.R_VPP2, SysMsg.AdjVol.R_VNN2);            
             }
             
             if(SysMsg.Cmd.CW_Send == TRUE)
@@ -122,13 +122,13 @@ void App_Com_Task()
                 
                 #endif
                 
-                DEBUG_PRINTF(DEBUG_STRING, "Voltage : %d %d %d %d \r\n", SysMsg.AdjVol.R_VPP1, SysMsg.AdjVol.R_VNN1, SysMsg.AdjVol.R_VPP2, SysMsg.AdjVol.R_VNN2);
+                DEBUG_PRINTF(DEBUG_STRING, "CW Send Voltage : %d %d %d %d \r\n", SysMsg.AdjVol.R_VPP1, SysMsg.AdjVol.R_VNN1, SysMsg.AdjVol.R_VPP2, SysMsg.AdjVol.R_VNN2);
             }
             
             if(SysMsg.Cmd.Timeout == TRUE)
             {
                 SysMsg.Cmd.Timeout = FALSE;
-                
+             
                 
                 #if DEBUG_COMMAND
 
@@ -154,39 +154,15 @@ void App_Com_Task()
                 
                 #endif
 
-                DEBUG_PRINTF(DEBUG_STRING, "Voltage : %d %d %d %d \r\n", SysMsg.AdjVol.R_VPP1, SysMsg.AdjVol.R_VNN1, SysMsg.AdjVol.R_VPP2, SysMsg.AdjVol.R_VNN2);
+                DEBUG_PRINTF(DEBUG_STRING, "Timeout Send Voltage : %d %d %d %d \r\n", SysMsg.AdjVol.R_VPP1, SysMsg.AdjVol.R_VNN1, SysMsg.AdjVol.R_VPP2, SysMsg.AdjVol.R_VNN2);
             }
             
-            if(SysMsg.Cmd.Voltage_Send == TRUE)
-            {
-                SysMsg.Cmd.Voltage_Send = FALSE;
-                
-                #if DEBUG_COMMAND
-                
-                SenFrameCmd.Cid = CMD_READ_VOLTAGE;
-                SenFrameCmd.Len = 8;
-                
-                SenFrameCmd.Data[0] = SysMsg.AdjVol.R_VPP1 >> 8;
-                SenFrameCmd.Data[1] = SysMsg.AdjVol.R_VPP1;
-                SenFrameCmd.Data[2] = SysMsg.AdjVol.R_VNN1 >> 8;
-                SenFrameCmd.Data[3] = SysMsg.AdjVol.R_VNN1;
-                SenFrameCmd.Data[4] = SysMsg.AdjVol.R_VPP2 >> 8;
-                SenFrameCmd.Data[5] = SysMsg.AdjVol.R_VPP2;
-                SenFrameCmd.Data[6] = SysMsg.AdjVol.R_VNN2 >> 8;
-                SenFrameCmd.Data[7] = SysMsg.AdjVol.R_VNN2;
-                
-                FrameCmdPackage(DebugComTX.Data);
-                Send_CmdPackage(DEBUG_COM_DMAY_STREAMX_TX);
-                
-                #endif
-                
-                DEBUG_PRINTF(DEBUG_STRING, "Voltage : %d %d %d %d \r\n", SysMsg.AdjVol.R_VPP1, SysMsg.AdjVol.R_VNN1, SysMsg.AdjVol.R_VPP2, SysMsg.AdjVol.R_VNN2);
-            }
+
         }
     
         #endif
-
-        OSTimeDlyHMSM(0, 0, 0, 50, OS_OPT_TIME_PERIODIC, &err);
+        
+        OSTimeDlyHMSM(0, 0, 0, 5, OS_OPT_TIME_PERIODIC, &err);
     }
 }
 

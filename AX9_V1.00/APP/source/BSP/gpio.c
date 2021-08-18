@@ -162,6 +162,7 @@ void Gpio_Config()
 
     //SV_CTL_IN
     Gpio_Init(SV_CTL_IN_PORT, SV_CTL_IN_PIN, GPIO_Mode_OUT, GPIO_OType_PP, GPIO_PuPd_NOPULL);
+    SV_CTL_IN(1);
 
     //V_PROE1
     Gpio_Init(V_PROE1_PORT, V_PROE1_PIN, GPIO_Mode_IN, GPIO_OType_PP, GPIO_PuPd_UP);
@@ -276,13 +277,12 @@ void Gpio_Config()
     TX7516_EN(0);
 
     //C_VNN2_VPP2
-    Gpio_Init(C_VPP2_VNN2_PORT, C_VPP2_VNN2_PIN, GPIO_Mode_OUT, GPIO_OType_PP, GPIO_PuPd_NOPULL);
+    Gpio_Init(C_VPP2_VNN2_PORT, C_VPP2_VNN2_PIN, GPIO_Mode_OUT, GPIO_OType_PP, GPIO_PuPd_DOWN);
     CTL_VPP2_VNN2_EN(0);
 
     //C_VNN1_VPP1
-    Gpio_Init(C_VPP1_VNN1_PORT, C_VPP1_VNN1_PIN, GPIO_Mode_OUT, GPIO_OType_PP, GPIO_PuPd_NOPULL); 
+    Gpio_Init(C_VPP1_VNN1_PORT, C_VPP1_VNN1_PIN, GPIO_Mode_OUT, GPIO_OType_PP, GPIO_PuPd_DOWN); 
     CTL_VPP1_VNN1_EN(0);    
-    
 }
 
 

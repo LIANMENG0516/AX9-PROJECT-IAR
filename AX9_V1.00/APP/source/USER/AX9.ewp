@@ -103,7 +103,7 @@
                 </option>
                 <option>
                     <name>OGUseCmsis</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>OGUseCmsisDspLib</name>
@@ -764,7 +764,7 @@
                 </option>
                 <option>
                     <name>IlinkIcfFile</name>
-                    <state>$TOOLKIT_DIR$\config\linker\ST\stm32f405xG.icf</state>
+                    <state>$PROJ_DIR$\AX9.icf</state>
                 </option>
                 <option>
                     <name>IlinkIcfFileSlave</name>

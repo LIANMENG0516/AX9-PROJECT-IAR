@@ -8,7 +8,12 @@ extern Com_Buffer DebugComTX;
 extern Com_Buffer CommuComRX;
 extern Com_Buffer CommuComTX;
 
-uint8_t BoardInfo[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+OS_CPU_EXT __ALIGN_BEGIN uint8_t USB_Rx_Buffer[CDC_DATA_MAX_PACKET_SIZE] __ALIGN_END ;
+OS_CPU_EXT __ALIGN_BEGIN uint8_t USB_Tx_Buffer[CDC_DATA_MAX_PACKET_SIZE] __ALIGN_END ;
+OS_CPU_EXT CDC_IF_Prop_TypeDef VCP_fops;
+
+uint8_t DateStr[11] = __DATE__;
+uint8_t TimeStr[8]  = __TIME__;
 
 uint8_t	RcvDataCmd[100];
 CmdFrameStr RcvFrameCmd = {0x68, 0x04, 0x00, 0x00, (uint8_t *)RcvDataCmd, 0x00, 0x16};
@@ -57,7 +62,6 @@ uint8_t Ec_Info[] = {
                         0x00,                                                               //D0V95_H
                         0x5F,                                                               //D0V95_L    
                     };
-
 
 typedef struct
 {
@@ -126,141 +130,382 @@ void Update_EcInfo()
     Ec_Info[47] = SysMsg.AdjVol.R_D0V95 >> 8;       Ec_Info[48] = SysMsg.AdjVol.R_D0V95;
 }
 
-void Get_EC_Info()
-{
-    SysMsg.Cmd.EcInfo_Send = TRUE;
-}
-
-void Get_FireWare_Version()
-{
-    SysMsg.Cmd.Firmware_Send = TRUE;
-}
-
-void Get_Compile_Info()
-{
-     SysMsg.Cmd.CompileInfo_Send = TRUE;
-}
-
-void Calc_TarVol_AlowRange()
-{    
-    SysMsg.AdjVol.MAX_VPP1 = SysMsg.AdjVol.T_VPP1 + 150;
-    SysMsg.AdjVol.MIN_VPP1 = SysMsg.AdjVol.T_VPP1 - 150;
-    SysMsg.AdjVol.MAX_VNN1 = SysMsg.AdjVol.T_VPP1 + 150;
-    SysMsg.AdjVol.MIN_VNN1 = SysMsg.AdjVol.T_VPP1 - 150;
-    
-    if(SysMsg.AdjVol.Adj_HV == TRUE)
-    {
-        SysMsg.AdjVol.Adj_HV = FALSE;
+void Cmd_EcInfo()
+{        
+    SenFrameCmd.Cid = CMD_EC_COMMUNICATE;
+    SenFrameCmd.Len = 49;
+    SenFrameCmd.Data = Ec_Info;
         
-        SysMsg.AdjVol.MAX_VPP2 = SysMsg.AdjVol.T_VPP2 + 150;
-        SysMsg.AdjVol.MIN_VPP2 = SysMsg.AdjVol.T_VPP2 - 150;
-        SysMsg.AdjVol.MAX_VNN2 = SysMsg.AdjVol.T_VPP2 + 150;
-        SysMsg.AdjVol.MIN_VNN2 = SysMsg.AdjVol.T_VPP2 - 150;
+    if(SysMsg.Cmd.Channel == ECCOM_CHANNEL)
+    {
+        FrameCmdPackage(CommuComTX.Data);
+        Send_CmdPackage(COMMU_COM_DMAY_STREAMX_TX);
     }
     
-    if(SysMsg.AdjVol.Adj_CW == TRUE)
+    if(SysMsg.Cmd.Channel == USB_CHANNEL)
     {
-        SysMsg.AdjVol.Adj_CW = FALSE;
-        
-        SysMsg.AdjVol.MAX_VPP2 = SysMsg.AdjVol.T_VPP2 + 100;
-        SysMsg.AdjVol.MIN_VPP2 = SysMsg.AdjVol.T_VPP2 - 100;
-        SysMsg.AdjVol.MAX_VNN2 = SysMsg.AdjVol.T_VPP2 + 100;
-        SysMsg.AdjVol.MIN_VNN2 = SysMsg.AdjVol.T_VPP2 - 100;
+        FrameCmdPackage(USB_Tx_Buffer);
+        VCP_fops.pIf_DataTx(USB_Tx_Buffer, (USB_Tx_Buffer[3] + 6));
+    }
+    
+    if(SysMsg.Cmd.Channel == DEBUGCOM_CHANNEL)
+    {
+        #if DEBUG_COMMAND
+        FrameCmdPackage(DebugComTX.Data);
+        Send_CmdPackage(DEBUG_COM_DMAY_STREAMX_TX);
+        #endif
     }
 }
 
-void Get_AdjHv_Msg()
+void Cmd_FirmWareVer()
 {
-    SysMsg.AdjVol.TimeFlag = TRUE;
+    SenFrameCmd.Cid = CMD_FW_VERSION;
+    SenFrameCmd.Len = 1;
+    SenFrameCmd.Data[0] = FW_VERSION;
     
-    SysMsg.AdjVol.T_VPP1 = (RcvFrameCmd.Data[0] << 8) | RcvFrameCmd.Data[1];
-    SysMsg.AdjVol.T_VNN1 = (RcvFrameCmd.Data[2] << 8) | RcvFrameCmd.Data[3];
-    SysMsg.AdjVol.T_VPP2 = (RcvFrameCmd.Data[4] << 8) | RcvFrameCmd.Data[5];
-    SysMsg.AdjVol.T_VNN2 = (RcvFrameCmd.Data[6] << 8) | RcvFrameCmd.Data[7];
+    if(SysMsg.Cmd.Channel == ECCOM_CHANNEL)
+    {
+        FrameCmdPackage(CommuComTX.Data);
+        Send_CmdPackage(COMMU_COM_DMAY_STREAMX_TX);
+    }
     
-    SysMsg.AdjVol.Adj_HV = TRUE;
-    Calc_TarVol_AlowRange();                                    //计算允许误差范围
-    Adjust_Voltage_HV();                                        //执行高压调压处理
-    SysMsg.AdjVol.HV_Minitor = TRUE;                            //处理完成打开高压监控 
-}
-
-void Get_AdjCw_Msg()
-{
-    SysMsg.AdjVol.TimeFlag = TRUE;
-
-    SysMsg.AdjVol.T_VPP1 = (RcvFrameCmd.Data[0] << 8) | RcvFrameCmd.Data[1];
-    SysMsg.AdjVol.T_VNN1 = (RcvFrameCmd.Data[2] << 8) | RcvFrameCmd.Data[3];
-    SysMsg.AdjVol.T_VPP2 = (RcvFrameCmd.Data[4] << 8) | RcvFrameCmd.Data[5];
-    SysMsg.AdjVol.T_VNN2 = (RcvFrameCmd.Data[6] << 8) | RcvFrameCmd.Data[7];
+    if(SysMsg.Cmd.Channel == USB_CHANNEL)
+    {
+        FrameCmdPackage(USB_Tx_Buffer);
+        VCP_fops.pIf_DataTx(USB_Tx_Buffer, (USB_Tx_Buffer[3] + 6));
+    }
     
-    SysMsg.AdjVol.Adj_CW = TRUE;
-    Calc_TarVol_AlowRange(); 
-    Adjust_Voltage_CW();                                        //执行低压调压处理
-    SysMsg.AdjVol.CW_Minitor = TRUE;                            //处理完成打开低压监控
+    if(SysMsg.Cmd.Channel == DEBUGCOM_CHANNEL)
+    {
+        #if DEBUG_COMMAND
+        FrameCmdPackage(DebugComTX.Data);
+        Send_CmdPackage(DEBUG_COM_DMAY_STREAMX_TX);
+        #endif
+    }
 }
 
-void Get_Voltage_Msg()
+void Cmd_CompileInfo()
 {
-    SysMsg.Cmd.Voltage_Send = TRUE;
+    SenFrameCmd.Cid = CMD_COMPILE_INFO;
+    SenFrameCmd.Len = sizeof(DateStr) + sizeof(TimeStr);
+
+    memcpy(&SenFrameCmd.Data[0], DateStr, 11);
+    memcpy(&SenFrameCmd.Data[11], TimeStr, 8);
+    
+    if(SysMsg.Cmd.Channel == ECCOM_CHANNEL)
+    {
+        FrameCmdPackage(CommuComTX.Data);
+        Send_CmdPackage(COMMU_COM_DMAY_STREAMX_TX);
+    }
+    
+    if(SysMsg.Cmd.Channel == USB_CHANNEL)
+    {
+        FrameCmdPackage(USB_Tx_Buffer);
+        VCP_fops.pIf_DataTx(USB_Tx_Buffer, (USB_Tx_Buffer[3] + 6));
+    }
+    
+    if(SysMsg.Cmd.Channel == DEBUGCOM_CHANNEL)
+    {
+        #if DEBUG_COMMAND
+        FrameCmdPackage(DebugComTX.Data);
+        Send_CmdPackage(DEBUG_COM_DMAY_STREAMX_TX);
+        #endif
+    }
 }
 
-void Get_Fan_Info()
+void Cmd_AdjVolMsg()
 {
-    SysMsg.Cmd.FanInfo_Send = TRUE;
+    SenFrameCmd.Cid = CMD_READ_ADJVOL;
+    SenFrameCmd.Len = 8;   
+    SenFrameCmd.Data[0] = SysMsg.AdjVol.R_VPP1 >> 8;
+    SenFrameCmd.Data[1] = SysMsg.AdjVol.R_VPP1;
+    SenFrameCmd.Data[2] = SysMsg.AdjVol.R_VNN1 >> 8;
+    SenFrameCmd.Data[3] = SysMsg.AdjVol.R_VNN1;
+    SenFrameCmd.Data[4] = SysMsg.AdjVol.R_VPP2 >> 8;
+    SenFrameCmd.Data[5] = SysMsg.AdjVol.R_VPP2;
+    SenFrameCmd.Data[6] = SysMsg.AdjVol.R_VNN2 >> 8;
+    SenFrameCmd.Data[7] = SysMsg.AdjVol.R_VNN2;
+
+    if(SysMsg.Cmd.Channel == ECCOM_CHANNEL)
+    {
+        FrameCmdPackage(CommuComTX.Data);
+        Send_CmdPackage(COMMU_COM_DMAY_STREAMX_TX);
+    }
+    
+    if(SysMsg.Cmd.Channel == USB_CHANNEL)
+    {
+        FrameCmdPackage(USB_Tx_Buffer);
+        VCP_fops.pIf_DataTx(USB_Tx_Buffer, (USB_Tx_Buffer[3] + 6));
+    }
+    
+    if(SysMsg.Cmd.Channel == DEBUGCOM_CHANNEL)
+    {
+        #if DEBUG_COMMAND
+        FrameCmdPackage(DebugComTX.Data);
+        Send_CmdPackage(DEBUG_COM_DMAY_STREAMX_TX);
+        #endif
+    }   
+    
+    DEBUG_PRINTF(DEBUG_STRING, "Get Send Voltage : %d %d %d %d \r\n", SysMsg.AdjVol.R_VPP1, SysMsg.AdjVol.R_VNN1, SysMsg.AdjVol.R_VPP2, SysMsg.AdjVol.R_VNN2);
 }
 
-void Get_Pwr_Info()
+void Cmd_FanInfo()
 {
-    SysMsg.Cmd.PwrInfo_Send = TRUE;
+    SenFrameCmd.Cid = CMD_FAN_INFO;
+    SenFrameCmd.Len = 15;
+    SenFrameCmd.Data[0] = SysMsg.Fan.Rpm1 >> 8;
+    SenFrameCmd.Data[1] = SysMsg.Fan.Rpm1;
+    SenFrameCmd.Data[2] = SysMsg.Fan.Rpm2 >> 8;
+    SenFrameCmd.Data[3] = SysMsg.Fan.Rpm2;
+    SenFrameCmd.Data[4] = SysMsg.Fan.Rpm3 >> 8;
+    SenFrameCmd.Data[5] = SysMsg.Fan.Rpm3;
+    SenFrameCmd.Data[6] = SysMsg.Fan.Rpm4 >> 8;
+    SenFrameCmd.Data[7] = SysMsg.Fan.Rpm4;
+    SenFrameCmd.Data[8] = SysMsg.Fan.Rpm5 >> 8;
+    SenFrameCmd.Data[9] = SysMsg.Fan.Rpm5;
+    
+    if(SysMsg.Cmd.Channel == ECCOM_CHANNEL)
+    {
+        FrameCmdPackage(CommuComTX.Data);
+        Send_CmdPackage(COMMU_COM_DMAY_STREAMX_TX);
+    }
+    
+    if(SysMsg.Cmd.Channel == USB_CHANNEL)
+    {
+        FrameCmdPackage(USB_Tx_Buffer);
+        VCP_fops.pIf_DataTx(USB_Tx_Buffer, (USB_Tx_Buffer[3] + 6));
+    }
+    
+    if(SysMsg.Cmd.Channel == DEBUGCOM_CHANNEL)
+    {
+        #if DEBUG_COMMAND
+        FrameCmdPackage(DebugComTX.Data);
+        Send_CmdPackage(DEBUG_COM_DMAY_STREAMX_TX);
+        #endif
+    }
 }
 
-void Get_Vpp1Vnn1EnResponse()
+void Cmd_PwrInfo()
+{
+    SenFrameCmd.Cid = CMD_PWR_INFO;
+    SenFrameCmd.Len = 7;
+    SenFrameCmd.Data[0] = SysMsg.PwrInfo.Ac_Insert;
+    SenFrameCmd.Data[1] = SysMsg.PwrInfo.Bat1_Insert;
+    SenFrameCmd.Data[2] = SysMsg.PwrInfo.Bat1_Power;
+    SenFrameCmd.Data[3] = SysMsg.PwrInfo.Bat1_State;
+    SenFrameCmd.Data[4] = SysMsg.PwrInfo.Bat2_Insert;
+    SenFrameCmd.Data[5] = SysMsg.PwrInfo.Bat2_Power;
+    SenFrameCmd.Data[6] = SysMsg.PwrInfo.Bat2_State;
+                
+    if(SysMsg.Cmd.Channel == ECCOM_CHANNEL)
+    {
+        FrameCmdPackage(CommuComTX.Data);
+        Send_CmdPackage(COMMU_COM_DMAY_STREAMX_TX);
+    }
+    
+    if(SysMsg.Cmd.Channel == USB_CHANNEL)
+    {
+        FrameCmdPackage(USB_Tx_Buffer);
+        VCP_fops.pIf_DataTx(USB_Tx_Buffer, (USB_Tx_Buffer[3] + 6));
+    }
+    
+    if(SysMsg.Cmd.Channel == DEBUGCOM_CHANNEL)
+    {
+        #if DEBUG_COMMAND
+        FrameCmdPackage(DebugComTX.Data);
+        Send_CmdPackage(DEBUG_COM_DMAY_STREAMX_TX);
+        #endif
+    }
+}
+
+void Cmd_WriteUsPowerId()
+{        
+    Write_UsPowerId(&RcvFrameCmd.Data[0]);
+    
+    SenFrameCmd.Cid = CMD_WRITE_USPOWERID;
+    SenFrameCmd.Len = 1;
+    SenFrameCmd.Data[0] = RESPONSE_OK;
+
+    if(SysMsg.Cmd.Channel == ECCOM_CHANNEL)
+    {
+        FrameCmdPackage(CommuComTX.Data);
+        Send_CmdPackage(COMMU_COM_DMAY_STREAMX_TX);
+    }
+    
+    if(SysMsg.Cmd.Channel == USB_CHANNEL)
+    {
+        FrameCmdPackage(USB_Tx_Buffer);
+        VCP_fops.pIf_DataTx(USB_Tx_Buffer, (USB_Tx_Buffer[3] + 6));
+    }
+    
+    if(SysMsg.Cmd.Channel == DEBUGCOM_CHANNEL)
+    {
+        #if DEBUG_COMMAND
+        FrameCmdPackage(DebugComTX.Data);
+        Send_CmdPackage(DEBUG_COM_DMAY_STREAMX_TX);
+        #endif
+    }
+}
+
+void Cmd_ReadUsPowerId()
+{
+    
+
+}
+
+void Cmd_Vpp1Vnn1EnableRes()
 {
     CTL_VPP1_VNN1_EN(1);  
-    SysMsg.Cmd.Vpp1Vnn1En_Send = TRUE;    
+
+    SenFrameCmd.Cid = CMD_VPP1VNN1_EN;
+    SenFrameCmd.Len = 1;
+    SenFrameCmd.Data[0] = RESPONSE_OK;
+    
+    if(SysMsg.Cmd.Channel == ECCOM_CHANNEL)
+    {
+        FrameCmdPackage(CommuComTX.Data);
+        Send_CmdPackage(COMMU_COM_DMAY_STREAMX_TX);
+    }
+    
+    if(SysMsg.Cmd.Channel == USB_CHANNEL)
+    {
+        FrameCmdPackage(USB_Tx_Buffer);
+        VCP_fops.pIf_DataTx(USB_Tx_Buffer, (USB_Tx_Buffer[3] + 6));
+    }
+    
+    if(SysMsg.Cmd.Channel == DEBUGCOM_CHANNEL)
+    {
+        #if DEBUG_COMMAND
+        FrameCmdPackage(DebugComTX.Data);
+        Send_CmdPackage(DEBUG_COM_DMAY_STREAMX_TX);
+        #endif
+    }
 }
 
-void Get_Vpp1Vnn1DisResponse()
+void Cmd_Vpp1Vnn1DisableRes()
 {
     CTL_VPP1_VNN1_EN(0);
-    SysMsg.Cmd.Vpp1Vnn1Dis_Send = TRUE;
+
+    SenFrameCmd.Cid = CMD_VPP1VNN1_DIS;
+    SenFrameCmd.Len = 1;
+    SenFrameCmd.Data[0] = RESPONSE_OK;
+            
+    if(SysMsg.Cmd.Channel == ECCOM_CHANNEL)
+    {
+        FrameCmdPackage(CommuComTX.Data);
+        Send_CmdPackage(COMMU_COM_DMAY_STREAMX_TX);
+    }
+    
+    if(SysMsg.Cmd.Channel == USB_CHANNEL)
+    {
+        FrameCmdPackage(USB_Tx_Buffer);
+        VCP_fops.pIf_DataTx(USB_Tx_Buffer, (USB_Tx_Buffer[3] + 6));
+    }
+    
+    if(SysMsg.Cmd.Channel == DEBUGCOM_CHANNEL)
+    {
+        #if DEBUG_COMMAND
+        FrameCmdPackage(DebugComTX.Data);
+        Send_CmdPackage(DEBUG_COM_DMAY_STREAMX_TX);
+        #endif
+    }
 }
 
-void Get_Vpp2Vnn2EnResponse()
+void Cmd_Vpp2Vnn2EnableRes()
 {
     CTL_VPP2_VNN2_EN(1);
-    SysMsg.Cmd.Vpp2Vnn2En_Send = TRUE;
+    
+    SenFrameCmd.Cid = CMD_VPP2VNN2_EN;
+    SenFrameCmd.Len = 1;
+    SenFrameCmd.Data[0] = RESPONSE_OK;
+
+    if(SysMsg.Cmd.Channel == ECCOM_CHANNEL)
+    {
+        FrameCmdPackage(CommuComTX.Data);
+        Send_CmdPackage(COMMU_COM_DMAY_STREAMX_TX);
+    }
+    
+    if(SysMsg.Cmd.Channel == USB_CHANNEL)
+    {
+        FrameCmdPackage(USB_Tx_Buffer);
+        VCP_fops.pIf_DataTx(USB_Tx_Buffer, (USB_Tx_Buffer[3] + 6));
+    }
+    
+    if(SysMsg.Cmd.Channel == DEBUGCOM_CHANNEL)
+    {
+        #if DEBUG_COMMAND
+        FrameCmdPackage(DebugComTX.Data);
+        Send_CmdPackage(DEBUG_COM_DMAY_STREAMX_TX);
+        #endif
+    }
 }
 
-void Get_Vpp2Vnn2DisResponse()
+void Cmd_Vpp2Vnn2DisableRes()
 {
     CTL_VPP2_VNN2_EN(0);
-    SysMsg.Cmd.Vpp2Vnn2Dis_Send = TRUE;
-}
-
-void InValid_CidData()
-{
-	SenFrameCmd.Len = 1;
-	SenFrameCmd.Data[0] = INVALID_CMD;
-}
-
-void Write_BowarInfo()
-{    
-    for(uint8_t i=0; i<13; i++)
-    {
-        BoardInfo[i] = RcvFrameCmd.Data[i];
-    }
-
-    DS2431_WriteData(0, BoardInfo);
     
-    SysMsg.Cmd.WriteBoardOk_Send = TRUE;
+    SenFrameCmd.Cid = CMD_VPP2VNN2_DIS;
+    SenFrameCmd.Len = 1;
+    SenFrameCmd.Data[0] = RESPONSE_OK;
+            
+   if(SysMsg.Cmd.Channel == ECCOM_CHANNEL)
+    {
+        FrameCmdPackage(CommuComTX.Data);
+        Send_CmdPackage(COMMU_COM_DMAY_STREAMX_TX);
+    }
+    
+    if(SysMsg.Cmd.Channel == USB_CHANNEL)
+    {
+        FrameCmdPackage(USB_Tx_Buffer);
+        VCP_fops.pIf_DataTx(USB_Tx_Buffer, (USB_Tx_Buffer[3] + 6));
+    }
+    
+    if(SysMsg.Cmd.Channel == DEBUGCOM_CHANNEL)
+    {
+        #if DEBUG_COMMAND
+        FrameCmdPackage(DebugComTX.Data);
+        Send_CmdPackage(DEBUG_COM_DMAY_STREAMX_TX);
+        #endif
+    }
 }
 
-void Read_BowarInfo()
+void Cmd_AdjHvMsg()
 {
-    SysMsg.Cmd.BoardInfo_Send = TRUE;
-
+    Get_AdjHvMsg(RcvFrameCmd.Data);
 }
+
+void Cmd_AdjCwMsg()
+{
+    Get_AdjCwMsg(RcvFrameCmd.Data);
+}
+
+void Cmd_InValidData()
+{
+    SenFrameCmd.Cid = CMD_INVALID;
+    SenFrameCmd.Len = 1;
+    SenFrameCmd.Data[0] = CMD_INVALID;
+        
+    if(SysMsg.Cmd.Channel == ECCOM_CHANNEL)
+    {
+        FrameCmdPackage(CommuComTX.Data);
+        Send_CmdPackage(COMMU_COM_DMAY_STREAMX_TX);
+    }
+    
+    if(SysMsg.Cmd.Channel == USB_CHANNEL)
+    {
+        FrameCmdPackage(USB_Tx_Buffer);
+        VCP_fops.pIf_DataTx(USB_Tx_Buffer, (USB_Tx_Buffer[3] + 6));
+    }
+    
+    if(SysMsg.Cmd.Channel == DEBUGCOM_CHANNEL)
+    {
+        #if DEBUG_COMMAND
+        FrameCmdPackage(DebugComTX.Data);
+        Send_CmdPackage(DEBUG_COM_DMAY_STREAMX_TX);
+        #endif
+    }
+}
+
 
 void FrameCmdPackage(uint8_t *pBuf)	//数据打包
 {
@@ -277,7 +522,7 @@ void FrameCmdPackage(uint8_t *pBuf)	//数据打包
 	pBuf[1] = SenFrameCmd.Id;
 	pBuf[2] = SenFrameCmd.Cid;
 	pBuf[3] = SenFrameCmd.Len;
-    for(int i=0; i<SenFrameCmd.Len; i++)
+        for(int i=0; i<SenFrameCmd.Len; i++)
 	{
 		pBuf[4 + i] = SenFrameCmd.Data[i];
 	}
@@ -296,16 +541,16 @@ ErrorStatus ReceiveFrameAnalysis(uint8_t *pData, uint8_t DataLen)
 {
     uint8_t CmdCrc = 0;
     
-	RcvFrameCmd.Header 		= 	*pData++;
-	RcvFrameCmd.Id 			= 	*pData++;
-	RcvFrameCmd.Cid 		= 	*pData++;
-	RcvFrameCmd.Len 		= 	*pData++;
-	for(int i=0; i<(DataLen-6); i++)
-	{
-		RcvFrameCmd.Data[i] = 	*pData++;
-	}
-	RcvFrameCmd.Chk 		= 	*pData++;
-	RcvFrameCmd.Tail 		= 	*pData;
+    RcvFrameCmd.Header 		= 	*pData++;
+    RcvFrameCmd.Id 		= 	*pData++;
+    RcvFrameCmd.Cid 		= 	*pData++;
+    RcvFrameCmd.Len 		= 	*pData++;
+    for(int i=0; i<(DataLen-6); i++)
+    {
+            RcvFrameCmd.Data[i] = 	*pData++;
+    }
+    RcvFrameCmd.Chk 		= 	*pData++;
+    RcvFrameCmd.Tail 		= 	*pData;
     
     
     CmdCrc += RcvFrameCmd.Id;
@@ -319,6 +564,13 @@ ErrorStatus ReceiveFrameAnalysis(uint8_t *pData, uint8_t DataLen)
     
     if(RcvFrameCmd .Header == 0x68 && RcvFrameCmd.Id == 0x04 && RcvFrameCmd.Tail == 0x16 && CmdCrc == RcvFrameCmd.Chk)
     {
+        DEBUG_PRINTF(DEBUG_STRING, "Receive Command : %02X %02X %02X %02X ", RcvFrameCmd.Header, RcvFrameCmd.Id, RcvFrameCmd.Cid, RcvFrameCmd.Len);            
+        for(int i=0; i<RcvFrameCmd.Len; i++)
+        {
+            DEBUG_PRINTF(DEBUG_STRING, "%02X ", RcvFrameCmd.Data[i]);
+        }
+        DEBUG_PRINTF(DEBUG_STRING, "%02X %02X \r\n", RcvFrameCmd.Chk, RcvFrameCmd.Tail);
+        
         return SUCCESS;
     }  
 
@@ -330,62 +582,80 @@ void Cmd_Process()
     switch(RcvFrameCmd.Cid)
     {
         case    CMD_EC_COMMUNICATE:
-                Get_EC_Info();
+                Cmd_EcInfo();
                 break;
         
         case    CMD_FW_VERSION:
-                Get_FireWare_Version();
+                Cmd_FirmWareVer();
                 break;
         
-        case    CHK_COMPILE_INFO:
-                Get_Compile_Info();
+        case    CMD_COMPILE_INFO:
+                Cmd_CompileInfo();
                 break;
 
-        case    CMD_ADJUST_HV:
-                Get_AdjHv_Msg();
-                break;
-        
-        case    CMD_ADJUST_CW:
-                Get_AdjCw_Msg();
-                break;
-        
-        case    CMD_READ_VOLTAGE:
-                Get_Voltage_Msg();
+        case    CMD_READ_ADJVOL:
+                Cmd_AdjVolMsg();
                 break;
         
         case    CMD_FAN_INFO:
-                Get_Fan_Info();
+                Cmd_FanInfo();
                 break;
         
         case    CMD_PWR_INFO:
-                Get_Pwr_Info();
+                Cmd_PwrInfo();
+                break;
+                
+        case    CMD_WRITE_USPOWERID:
+                Cmd_WriteUsPowerId();
+                break;
+        
+        case    CMD_READ_USPOWERID:
+                Cmd_ReadUsPowerId();
                 break;
         
         case    CMD_VPP1VNN1_EN:
-                Get_Vpp1Vnn1EnResponse();
+                Cmd_Vpp1Vnn1EnableRes();
                 break;
         
         case    CMD_VPP1VNN1_DIS:
-                Get_Vpp1Vnn1DisResponse();
+                Cmd_Vpp1Vnn1DisableRes();
                 break;
         
         case    CMD_VPP2VNN2_EN:
-                Get_Vpp2Vnn2EnResponse();
+                Cmd_Vpp2Vnn2EnableRes();
                 break;
         case    CMD_VPP2VNN2_DIS:
-                Get_Vpp2Vnn2DisResponse();
+                Cmd_Vpp2Vnn2DisableRes();
                 break;
                 
-        case    CMD_WRITE_BOARDINFO:
-                Write_BowarInfo();
+        case    CMD_ADJUST_HV:
+                SysMsg.AdjVol.HvFlag = TRUE;                                    //高压调压标志
+                SysMsg.AdjVol.CwFlag = FALSE;
+                SysMsg.AdjVol.VolMinitor = FALSE;
+
+//                Adjust_Voltage_Pcw_Ncw(250, 250); 
+                //Adjust_Cw_Reset();
+//                CTL_VPP1_VNN1_EN(1);    
+//                CTL_VPP2_VNN2_EN(1);
+    
+                Cmd_AdjHvMsg();
                 break;
         
-        case    CMD_READ_BOARDINFO:
-                Read_BowarInfo();
+        case    CMD_ADJUST_CW:
+                SysMsg.AdjVol.HvFlag = FALSE;                                   //低压调压
+                SysMsg.AdjVol.CwFlag = TRUE;
+                SysMsg.AdjVol.VolMinitor = FALSE;
+                
+//                Adjust_Hv2_Reset();
+//                CTL_VPP1_VNN1_EN(1);    
+//                CTL_VPP2_VNN2_EN(0);
+                
+                
+                Cmd_AdjCwMsg();
                 break;
 
         default:
-                InValid_CidData();
+                Cmd_InValidData();
                 break;
     } 
 }
@@ -431,19 +701,19 @@ uint8_t Deal_Compare(char *pData, uint8_t DataLen)
                 {
                     SysMsg.AdjVol.T_VNN2 = SysMsg.AdjVol.T_VPP2 = (pData[12] - '0') * 100 + (pData[13] - '0') * 10 + (pData[14] - '0');
                 }
-                SysMsg.AdjVol.Adj_HV = TRUE;
+                SysMsg.AdjVol.HvFlag = TRUE;
                 Calc_TarVol_AlowRange();                        
                 Adjust_Voltage_HV();                                      
-                SysMsg.AdjVol.HV_Minitor = TRUE;                      
+                SysMsg.AdjVol.VolMinitor = TRUE;                      
                 break;
         case 2: 
                 SysMsg.AdjVol.T_VNN1 = SysMsg.AdjVol.T_VPP1 = (pData[7] - '0') * 1000 + (pData[8] - '0') * 100 + (pData[9] - '0') * 10 + (pData[10] - '0');
                 SysMsg.AdjVol.T_VNN2 = SysMsg.AdjVol.T_VPP2 = (pData[12] - '0') * 100 + (pData[13] - '0') * 10 + (pData[14] - '0'); 
                 
-                SysMsg.AdjVol.Adj_CW = TRUE;
+                SysMsg.AdjVol.CwFlag = TRUE;
                 Calc_TarVol_AlowRange(); 
                 Adjust_Voltage_CW();           
-                SysMsg.AdjVol.CW_Minitor= TRUE;       
+                SysMsg.AdjVol.VolMinitor = TRUE;       
                 break;
     }
     

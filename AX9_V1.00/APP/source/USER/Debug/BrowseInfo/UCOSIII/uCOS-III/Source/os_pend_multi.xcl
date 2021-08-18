@@ -49,10 +49,6 @@ C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR\AX9_V1.00\APP\source\USER\..\UCOSIII\u
 -I
 C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR\AX9_V1.00\APP\source\USER\..\UCOSIII\uCOS-LIB\Ports\ARM-Cortex-M4\IAR
 -I
-D:\Program Files\IAR Systems\Embedded Workbench 9.0\arm\CMSIS\Core\Include\
--I
-D:\Program Files\IAR Systems\Embedded Workbench 9.0\arm\CMSIS\DSP\Include\
--I
 D:\Program Files\IAR Systems\Embedded Workbench 9.0\arm\inc\c\aarch32
 -I
 D:\Program Files\IAR Systems\Embedded Workbench 9.0\arm\inc
@@ -96,10 +92,6 @@ C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR\AX9_V1.00\APP\source\UCOSIII\uCOS-III\
 C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR\AX9_V1.00\APP\source\UCOSIII\uCOS-CPU\ARM-Cortex-M4\IAR
 -I
 C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR\AX9_V1.00\APP\source\UCOSIII\uCOS-LIB\Ports\ARM-Cortex-M4\IAR
--I
-D:\Program Files\IAR Systems\Embedded Workbench 9.0\arm\CMSIS\Core\Include
--I
-D:\Program Files\IAR Systems\Embedded Workbench 9.0\arm\CMSIS\DSP\Include
 -D__CHAR_BITS__=8
 -D__CHAR_MAX__=0xff
 -D__CHAR_MIN__=0

@@ -11,9 +11,9 @@ CPU_STK App_SysOnOff_Task_Stk[APP_SYSONOFF_STK_SIZE];
 void PowerOn_Sequence()
 {
     OS_ERR err;
-    
+    PBUS_ON(1);
     PWR_CTL(1);
-    OSTimeDly(2, OS_OPT_TIME_DLY, &err);
+    OSTimeDly(10, OS_OPT_TIME_DLY, &err);
     CTL_P12V_EN(1);
     OSTimeDly(20, OS_OPT_TIME_DLY, &err);
     CTL_N12V_5V5_EN(1);
@@ -36,6 +36,9 @@ void PowerOn_Sequence()
     OSTimeDly(15, OS_OPT_TIME_DLY, &err);
     EN_FPGA_02(1);
     AFE_EN2(1);
+    
+    CTL_VPP1_VNN1_EN(1);           //上电之后打开高压使能
+    CTL_VPP2_VNN2_EN(1);
 }
 
 void PowerDown_Sequence()
@@ -45,22 +48,38 @@ void PowerDown_Sequence()
     TX7516_EN(0);
     PWR_OK_COM(0);
     OSTimeDly(200, OS_OPT_TIME_DLY, &err);
+
     AFE_EN2(0);
     EN_FPGA_02(0);
+    OSTimeDly(50, OS_OPT_TIME_DLY, &err);
     AFE_EN1(0);
     EN_FPGA_01(0);
     EN_FRONT(0);
+    OSTimeDly(50, OS_OPT_TIME_DLY, &err);
     CTL_D1V45_EN(0);
     CTL_VDD_P5V_EN(0);
     CTL_D0V95_EN(0);
+    OSTimeDly(50, OS_OPT_TIME_DLY, &err);
     CTL_P2V25_EN(0);
     CTL_P3V75_EN(0);
+    OSTimeDly(100, OS_OPT_TIME_DLY, &err);
     CTL_P5V5_2_EN(0);
     CTL_P5V5_1_EN(0);
+    OSTimeDly(50, OS_OPT_TIME_DLY, &err);
     CTL_N12V_5V5_EN(0);
     CTL_P12V_EN(0);
+    OSTimeDly(10, OS_OPT_TIME_DLY, &err);
     PBUS_ON(0);
     PWR_CTL(0);
+    
+    
+    
+    
+    
+    
+    SystemStateInit();          
+    CTL_VPP1_VNN1_EN(0);        //下电之后关闭高压使能                                                 
+    CTL_VPP2_VNN2_EN(0);   
 }
 
 void System_OnCtrl()
@@ -77,7 +96,6 @@ void System_OnCtrl()
             {
                 SysMsg.PowerOnReq = FALSE;
                 PWR_BTN_COM(0);
-                PBUS_ON(1);
             }
         }
         
@@ -114,6 +132,7 @@ void System_OnCtrl()
                 TX7516_EN(1);
                 SysMsg.SystemState = SYSTEM_ON;
                 USB_CTRL_EN(1);
+                SysMsg.AdjVol.VolInit = TRUE;                                   //开机完成进行高压部分初始化
                 
             }
             else
@@ -126,22 +145,9 @@ void System_OnCtrl()
                     TX7516_EN(1);
                     SysMsg.SystemState = SYSTEM_ON;
                     USB_CTRL_EN(1);                                             //使能USB插入
+                    SysMsg.AdjVol.VolInit = TRUE;
                 }
             }                                                        
-            
-            
-            //调试固化高压发射为10V 5V           
-            CTL_VPP1_VNN1_EN(0);                       //关闭高压输出
-            CTL_VPP2_VNN2_EN(0);
-
-            Adjust_Cw_Reset();
-
-            Adjust_Voltage_Vpp1(4000);                 //调节VPP1至目标值
-            Adjust_Voltage_Vpp2(2000);                  //调节VPP2至目标值
-            Adjust_Voltage_Vnn1_Vnn2(4000, 2000);       //调节VNN1, VNN2至目标值
-
-            CTL_VPP1_VNN1_EN(1);                       //打开高压输出
-            CTL_VPP2_VNN2_EN(1);
         }
     }
 }
@@ -192,7 +198,7 @@ void App_SysOnOff_Task()
     {      
         System_OnCtrl();
         System_OffCtrl();
-
+                
         OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_PERIODIC, &err);
     }
 }

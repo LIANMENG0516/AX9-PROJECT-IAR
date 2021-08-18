@@ -73,6 +73,10 @@
         <encoding>System</encoding>
     </override>
     <override>
+        <path>C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR\AX9_V1.00\APP\source\APP\app_adjvol.h</path>
+        <encoding>System</encoding>
+    </override>
+    <override>
         <path>C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR\AX9_V1.00\APP\source\APP\app_com.c</path>
         <encoding>System</encoding>
     </override>
@@ -130,6 +134,10 @@
     </override>
     <override>
         <path>C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR\AX9_V1.00\APP\source\DEVICE\system.c</path>
+        <encoding>System</encoding>
+    </override>
+    <override>
+        <path>C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR\AX9_V1.00\APP\source\DEVICE\system.h</path>
         <encoding>System</encoding>
     </override>
     <override>

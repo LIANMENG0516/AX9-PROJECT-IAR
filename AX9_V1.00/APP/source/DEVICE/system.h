@@ -20,20 +20,36 @@ typedef enum {FALSE = 0, TRUE = !FALSE} bool;
 
 typedef struct
 {    
-    bool Adj_HV;
-    bool Adj_CW;
+    bool HvFlag;
+    bool CwFlag;
+
+    bool VolInit;               //高压初始化标志位, 开机完成后被置位, 程序检测此标志位进行高压部分的初始化
+    bool VolMinitor;            //高压监控标志位
     
-    bool HV_Minitor;
-    bool CW_Minitor;
+    bool AdjVolOpen;            //单次调压开启/关闭标志
+    bool AdjVolSuccess;         //单次调压成功与否标志
+    bool MinAdjVolOpen;         //微调开启/关闭标志
     
-    bool TimeFlag;
-    uint16_t Time;
+    bool TimeFlag;              //计时标志
+    
+    bool HV1NeedChange;         
+    bool HV2NeedChange;
+    
+    uint8_t  MinAdjVolCnt;      //微调次数
+      
+    uint16_t Time;              //调压时间
+    uint16_t TimeOut;           //调压超时时间
 
     uint16_t T_VPP1;
     uint16_t T_VNN1;
     uint16_t T_VPP2;
     uint16_t T_VNN2;
-
+    
+    uint16_t Old_T_VPP1;
+    uint16_t Old_T_VNN1;
+    uint16_t Old_T_VPP2;
+    uint16_t Old_T_VNN2;
+    
     uint16_t MAX_VPP1;
     uint16_t MIN_VPP1;
     uint16_t MAX_VNN1;
@@ -44,6 +60,20 @@ typedef struct
     uint16_t MAX_VNN2;
     uint16_t MIN_VNN2;
     
+    uint16_t T_McuDacHv1;
+    uint16_t T_SpiDacHv1;
+    uint16_t T_McuDacHv2;
+    uint16_t T_SpiDacHv2;
+    uint16_t T_SpiDacPcw;
+    uint16_t T_SpiDacNcw;
+    
+    uint16_t P_McuDacHv1;
+    uint16_t P_SpiDacHv1;
+    uint16_t P_McuDacHv2;
+    uint16_t P_SpiDacHv2;
+    uint16_t P_SpiDacPcw;
+    uint16_t P_SpiDacNcw;
+
     uint16_t R_VPP1;
     uint16_t R_VNN1;
     uint16_t R_VPP2;
@@ -66,7 +96,6 @@ typedef struct
 typedef struct
 {    
     uint8_t FPGA;
-    uint8_t CPU;
     uint8_t MCU;
 }SysTemper;
 
@@ -118,7 +147,7 @@ typedef struct
     FanStrc         Fan;
     Command_Deal    Cmd;
     PwrInfoStruct   PwrInfo;
-    uint8_t		    SystemState;
+    uint8_t         SystemState;
     bool            KeyState;
     bool            PowerOnReq;
     bool            ShutDownReq;

@@ -171,6 +171,25 @@ uint8_t DS2431_ReadData(uint8_t addr, uint8_t *buffer)
     return 0;
 }
 
+uint8_t UsPowerId[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+void Write_UsPowerId(uint8_t *buffer)
+{    
+    for(uint8_t i=0; i<16; i++)
+    {
+        UsPowerId[i] = *buffer++;
+    }
+
+    DS2431_WriteData(0, UsPowerId);
+}
+
+void Read_UsPowerId(uint8_t *buffer)
+{
+    DS2431_ReadData(0, buffer);
+
+}
+
+
 
 
 

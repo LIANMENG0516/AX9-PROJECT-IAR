@@ -1,16 +1,36 @@
 #include "system.h"
 
 System_MsgStruct SysMsg = {
+  
+    .AdjVol.HvFlag                      = FALSE,
+    .AdjVol.CwFlag                      = FALSE,
+    
+    .AdjVol.VolInit                     = FALSE,
+    .AdjVol.VolMinitor                  = FALSE,
+    
+    .AdjVol.AdjVolOpen                  = FALSE,
+    .AdjVol.AdjVolSuccess               = FALSE,
+    .AdjVol.MinAdjVolOpen               = FALSE, 
+    
     .AdjVol.TimeFlag                    = FALSE,
+    
+    .AdjVol.HV1NeedChange               = FALSE,
+    .AdjVol.HV2NeedChange               = FALSE,        
+    
+    .AdjVol.MinAdjVolCnt                = 0,
     .AdjVol.Time                        = 0,
-    .AdjVol.Adj_HV                      = FALSE,
-    .AdjVol.Adj_CW                      = FALSE,
-    .AdjVol.HV_Minitor                  = FALSE,
-    .AdjVol.CW_Minitor                  = FALSE,
+    .AdjVol.TimeOut                     = 0,
+
     .AdjVol.T_VPP1                      = 0,
     .AdjVol.T_VNN1                      = 0,
     .AdjVol.T_VPP2                      = 0, 
     .AdjVol.T_VNN2                      = 0,
+
+    .AdjVol.Old_T_VPP1                  = 0,
+    .AdjVol.Old_T_VNN1                  = 0,
+    .AdjVol.Old_T_VPP2                  = 0, 
+    .AdjVol.Old_T_VNN2                  = 0,
+    
     .AdjVol.MAX_VPP1                    = 0,
     .AdjVol.MIN_VPP1                    = 0, 
     .AdjVol.MAX_VNN1                    = 0,
@@ -19,6 +39,21 @@ System_MsgStruct SysMsg = {
     .AdjVol.MIN_VPP2                    = 0,
     .AdjVol.MAX_VNN2                    = 0,
     .AdjVol.MIN_VNN2                    = 0,
+
+    .AdjVol.T_McuDacHv1                 = VPP1_DAC_CLOSE,
+    .AdjVol.T_SpiDacHv1                 = VNN1_DAC_CLOSE,
+    .AdjVol.T_McuDacHv2                 = VPP2_DAC_CLOSE,
+    .AdjVol.T_SpiDacHv2                 = VNN2_DAC_CLOSE,
+    .AdjVol.T_SpiDacPcw                 = PCW_DAC_CLOSE,
+    .AdjVol.T_SpiDacNcw                 = NCW_DAC_CLOSE,
+    
+    .AdjVol.P_McuDacHv1                 = VPP1_DAC_CLOSE,
+    .AdjVol.P_SpiDacHv1                 = VNN1_DAC_CLOSE,
+    .AdjVol.P_McuDacHv2                 = VPP2_DAC_CLOSE,
+    .AdjVol.P_SpiDacHv2                 = VNN2_DAC_CLOSE,
+    .AdjVol.P_SpiDacPcw                 = PCW_DAC_CLOSE,
+    .AdjVol.P_SpiDacNcw                 = NCW_DAC_CLOSE,
+    
     .AdjVol.R_VPP1                      = 0,
     .AdjVol.R_VNN1                      = 0,
     .AdjVol.R_VPP2                      = 0,
@@ -36,7 +71,6 @@ System_MsgStruct SysMsg = {
     .AdjVol.R_IADP                      = 0,
 
     .Temperature.FPGA                   = 0,
-    .Temperature.CPU                    = 0,
     .Temperature.MCU                    = 0,
     
     .Fan.Rpm1                           = 0,    
@@ -77,24 +111,56 @@ System_MsgStruct SysMsg = {
 
 void SystemStateInit()
 {
-    SysMsg.AdjVol.TimeFlag              = FALSE;
-    SysMsg.AdjVol.Time                  = 0;
-    SysMsg.AdjVol.Adj_HV                = FALSE;
-    SysMsg.AdjVol.Adj_CW                = FALSE;
-    SysMsg.AdjVol.HV_Minitor            = FALSE;
-    SysMsg.AdjVol.CW_Minitor            = FALSE;
-    SysMsg.AdjVol.T_VPP1                = 0;
-    SysMsg.AdjVol.T_VNN1                = 0;
-    SysMsg.AdjVol.T_VPP2                = 0; 
-    SysMsg.AdjVol.T_VNN2                = 0;
-    SysMsg.AdjVol.MAX_VPP1              = 0;
-    SysMsg.AdjVol.MIN_VPP1              = 0; 
-    SysMsg.AdjVol.MAX_VNN1              = 0;
-    SysMsg.AdjVol.MIN_VNN1              = 0;
-    SysMsg.AdjVol.MAX_VPP2              = 0;
-    SysMsg.AdjVol.MIN_VPP2              = 0;
-    SysMsg.AdjVol.MAX_VNN2              = 0;
-    SysMsg.AdjVol.MIN_VNN2              = 0;
+    SysMsg.AdjVol.HvFlag                = FALSE,
+    SysMsg.AdjVol.CwFlag                = FALSE,
+    
+    SysMsg.AdjVol.VolInit               = FALSE,
+    SysMsg.AdjVol.VolMinitor            = FALSE,
+    
+    SysMsg.AdjVol.AdjVolOpen            = FALSE,
+    SysMsg.AdjVol.AdjVolSuccess         = FALSE,
+    SysMsg.AdjVol.MinAdjVolOpen         = FALSE, 
+    
+    SysMsg.AdjVol.TimeFlag              = FALSE,
+    
+    SysMsg.AdjVol.HV1NeedChange         = FALSE,
+    SysMsg.AdjVol.HV2NeedChange         = FALSE,        
+    
+    SysMsg.AdjVol.MinAdjVolCnt          = 0,
+    SysMsg.AdjVol.Time                  = 0,
+    SysMsg.AdjVol.TimeOut               = 0,
+
+    SysMsg.AdjVol.T_VPP1                = 0,
+    SysMsg.AdjVol.T_VNN1                = 0,
+    SysMsg.AdjVol.T_VPP2                = 0, 
+    SysMsg.AdjVol.T_VNN2                = 0,
+    SysMsg.AdjVol.Old_T_VPP1            = 0,
+    SysMsg.AdjVol.Old_T_VNN1            = 0,
+    SysMsg.AdjVol.Old_T_VPP2            = 0, 
+    SysMsg.AdjVol.Old_T_VNN2            = 0,
+    
+    SysMsg.AdjVol.MAX_VPP1              = 0,
+    SysMsg.AdjVol.MIN_VPP1              = 0, 
+    SysMsg.AdjVol.MAX_VNN1              = 0,
+    SysMsg.AdjVol.MIN_VNN1              = 0,
+    SysMsg.AdjVol.MAX_VPP2              = 0,
+    SysMsg.AdjVol.MIN_VPP2              = 0,
+    SysMsg.AdjVol.MAX_VNN2              = 0,
+    SysMsg.AdjVol.MIN_VNN2              = 0,
+
+    SysMsg.AdjVol.T_McuDacHv1           = VPP1_DAC_CLOSE,
+    SysMsg.AdjVol.T_SpiDacHv1           = VNN1_DAC_CLOSE,
+    SysMsg.AdjVol.T_McuDacHv2           = VPP2_DAC_CLOSE,
+    SysMsg.AdjVol.T_SpiDacHv2           = VNN2_DAC_CLOSE,
+    SysMsg.AdjVol.T_SpiDacPcw           = PCW_DAC_CLOSE,
+    SysMsg.AdjVol.T_SpiDacNcw           = NCW_DAC_CLOSE,
+    
+    SysMsg.AdjVol.P_McuDacHv1           = VPP1_DAC_CLOSE,
+    SysMsg.AdjVol.P_SpiDacHv1           = VNN1_DAC_CLOSE,
+    SysMsg.AdjVol.P_McuDacHv2           = VPP2_DAC_CLOSE,
+    SysMsg.AdjVol.P_SpiDacHv2           = VNN2_DAC_CLOSE,
+    SysMsg.AdjVol.P_SpiDacPcw           = PCW_DAC_CLOSE,
+    SysMsg.AdjVol.P_SpiDacNcw           = NCW_DAC_CLOSE,
     SysMsg.AdjVol.R_VPP1                = 0;
     SysMsg.AdjVol.R_VNN1                = 0;
     SysMsg.AdjVol.R_VPP2                = 0;
@@ -112,7 +178,6 @@ void SystemStateInit()
     SysMsg.AdjVol.R_IADP                = 0;
 
     SysMsg.Temperature.FPGA             = 0;
-    SysMsg.Temperature.CPU              = 0;
     SysMsg.Temperature.MCU              = 0;
     
     SysMsg.Fan.Rpm1                     = 0;    
@@ -159,11 +224,11 @@ void Delay_Nop(uint16_t count)
 
 bool System_PwrKey_Minitor()	
 {	
-	bool stateChange = FALSE;
-	static uint16_t startCnt = 0;
-	static bool stateNow = FALSE, stateOld = FALSE;
-		
-	stateNow = PWR_KEY_CHK() ? TRUE : FALSE;
+    bool stateChange = FALSE;
+    static uint16_t startCnt = 0;
+    static bool stateNow = FALSE, stateOld = FALSE;
+            
+    stateNow = PWR_KEY_CHK() ? TRUE : FALSE;
     
     if(stateOld != stateNow && ++startCnt>=60)
     {

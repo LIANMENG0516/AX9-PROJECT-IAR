@@ -9,7 +9,7 @@ OS_TMR			Sys_StateChk_Tmr;
 CPU_STK App_Start_Task_Stk[APP_START_STK_SIZE];										//任务堆栈空间
 
 void App_Start_Task()
-{
+{   
     OS_ERR err;
     CPU_SR_ALLOC();
 
@@ -36,6 +36,7 @@ void App_Start_Task()
     App_SysOnOff_TaskCreate();
     App_PwrManager_TaskCreate();
     App_Temperature_TaskCreate();
+    App_AdjVol_TaskCreate();
     
     OSTmrCreate(&Sys_StateChk_Tmr, "Sys_StateChk_Tmr", 1, 1, OS_OPT_TMR_PERIODIC, cb_Sys_StateChk_Tmr, 0, &err);	//创建定时器10ms	
     OSTmrStart(&Sys_StateChk_Tmr, &err);

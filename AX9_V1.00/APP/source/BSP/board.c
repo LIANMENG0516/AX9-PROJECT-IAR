@@ -29,11 +29,11 @@ void Debug_Com_Config()
     Dma_Config(DEBUG_COM_DMAY_STREAMX_RX, DEBUG_COM_DMA_CHANNEL_RX, (uint32_t)&DEBUG_COM->DR, (uint32_t)&DebugComRX.Data[0], DMA_DIR_PeripheralToMemory, sizeof(RcvData), DMA_PeripheralDataSize_Byte, DMA_MemoryDataSize_Byte, DMA_Mode_Circular, DMA_Priority_VeryHigh);      //配置DEBUG_COM_RX_DMA通道                                                                     
     Dma_Config(DEBUG_COM_DMAY_STREAMX_TX, DEBUG_COM_DMA_CHANNEL_TX, (uint32_t)&DEBUG_COM->DR, (uint32_t)&DebugComTX.Data[0], DMA_DIR_MemoryToPeripheral, sizeof(SenData), DMA_PeripheralDataSize_Byte, DMA_MemoryDataSize_Byte, DMA_Mode_Circular, DMA_Priority_VeryHigh);      //配置DEBUG_COM_TX_DMA通道  
 
-    DMA_Cmd(DEBUG_COM_DMAY_STREAMX_RX, ENABLE);                                     //使能DMA接收
-    DMA_Cmd(DEBUG_COM_DMAY_STREAMX_TX, DISABLE);                                    //关闭DMA发送
+    DMA_Cmd(DEBUG_COM_DMAY_STREAMX_RX, ENABLE);                                                                 //使能DMA接收
+    DMA_Cmd(DEBUG_COM_DMAY_STREAMX_TX, DISABLE);                                                                //关闭DMA发送
 
 
-    DMA_ITConfig(DEBUG_COM_DMAY_STREAMX_TX, DMA_IT_TC, ENABLE);						//开启DMA发送中断	
+    DMA_ITConfig(DEBUG_COM_DMAY_STREAMX_TX, DMA_IT_TC, ENABLE);						        //开启DMA发送中断	
 }
 
 void Commu_Com_Config()
@@ -50,10 +50,10 @@ void Commu_Com_Config()
     Dma_Config(COMMU_COM_DMAY_STREAMX_RX, COMMU_COM_DMA_CHANNEL_RX, (uint32_t)&COMMU_COM->DR, (uint32_t)&CommuComRX.Data[0], DMA_DIR_PeripheralToMemory, sizeof(RcvData), DMA_PeripheralDataSize_Byte, DMA_MemoryDataSize_Byte, DMA_Mode_Circular, DMA_Priority_VeryHigh);      //配置DEBUG_COM_RX_DMA通道                                                                     
     Dma_Config(COMMU_COM_DMAY_STREAMX_TX, COMMU_COM_DMA_CHANNEL_TX, (uint32_t)&COMMU_COM->DR, (uint32_t)&CommuComTX.Data[0], DMA_DIR_MemoryToPeripheral, sizeof(SenData), DMA_PeripheralDataSize_Byte, DMA_MemoryDataSize_Byte, DMA_Mode_Circular, DMA_Priority_VeryHigh);      //配置DEBUG_COM_TX_DMA通道  
 
-    DMA_Cmd(COMMU_COM_DMAY_STREAMX_RX, ENABLE);                                      //使能DMA接收
-    DMA_Cmd(COMMU_COM_DMAY_STREAMX_TX, DISABLE);                                     //关闭DMA发送
+    DMA_Cmd(COMMU_COM_DMAY_STREAMX_RX, ENABLE);                                                                 //使能DMA接收
+    DMA_Cmd(COMMU_COM_DMAY_STREAMX_TX, DISABLE);                                                                //关闭DMA发送
 
-    DMA_ITConfig(COMMU_COM_DMAY_STREAMX_TX, DMA_IT_TC, ENABLE);						 //开启DMA发送中断	
+    DMA_ITConfig(COMMU_COM_DMAY_STREAMX_TX, DMA_IT_TC, ENABLE);						        //开启DMA发送中断	
 }
 
 
@@ -147,6 +147,8 @@ void Board_Bsp_Init()
     Fan_Config();
     
     TimerConfig();
+    
+    Adjust_Voltage_Init();
 }
 
 

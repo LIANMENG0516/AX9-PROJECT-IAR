@@ -52,21 +52,15 @@
 
 #define USE_UCOSIII
 
-#define USE_DEBUG                           0       //调试总开关
-#define DEBUG_COMMAND                       1       //命令调试开关
-#define DEBUG_STRING                        0       //字符串调试开关
+#define USE_DEBUG                           1       //调试总开关
+#define DEBUG_COMMAND                       0       //命令调试开关
+#define DEBUG_STRING                        1       //字符串调试开关
 
-#define APP_LED_TASK_PRIO 					20
-#define APP_LED_STK_SIZE 					256
-
-#define APP_USB_TASK_PRIO 					21
-#define APP_USB_STK_SIZE 					256
+#define APP_LED_TASK_PRIO 		    20
+#define APP_LED_STK_SIZE                    256
 
 #define APP_ADJVOL_TASK_PRIO                22
-#define APP_ADJVOL_STK_SIZE                 256
-
-#define APP_COM_TASK_PRIO                   23
-#define APP_COM_STK_SIZE                    256
+#define APP_ADJVOL_STK_SIZE                 1024
 
 #define APP_FAN_TASK_PRIO                   24
 #define APP_FAN_STK_SIZE                    256
@@ -83,8 +77,14 @@
 #define APP_PWRMANAGER_TASK_PRIO            28
 #define APP_PWRMANAGER_STK_SIZE             256
 
-#define APP_START_TASK_PRIO 				29		//优先级
-#define APP_START_STK_SIZE 					256		//堆栈大小
+#define APP_COM_TASK_PRIO                   35
+#define APP_COM_STK_SIZE                    256
+
+#define APP_USB_TASK_PRIO                   36
+#define APP_USB_STK_SIZE                    256
+
+#define APP_START_TASK_PRIO                 40		//优先级
+#define APP_START_STK_SIZE                  256		//堆栈大小
 
 #endif
 
