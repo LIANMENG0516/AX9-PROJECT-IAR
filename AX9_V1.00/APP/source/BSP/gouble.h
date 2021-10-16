@@ -53,8 +53,8 @@
 #define USE_UCOSIII
 
 #define USE_DEBUG                           1       //调试总开关
-#define DEBUG_COMMAND                       0       //命令调试开关
-#define DEBUG_STRING                        1       //字符串调试开关
+#define DEBUG_COMMAND                       1       //命令调试开关
+#define DEBUG_STRING                        0       //字符串调试开关
 
 #define APP_LED_TASK_PRIO 		    20
 #define APP_LED_STK_SIZE                    256

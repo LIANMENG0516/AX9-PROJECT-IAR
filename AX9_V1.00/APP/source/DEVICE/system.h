@@ -5,6 +5,8 @@
 
 #include "gouble.h"
 
+#define PID_CTRL                0       //开启PID调节控制
+
 #define SYSTEM_OFF   0
 #define SYSTEM_ON    1
 #define SYSTEM_SLEEP 2
@@ -15,6 +17,9 @@
 
 #define FirmwareVersion_H 0x90
 #define FirmwareVersion_L 0x00
+
+#define HardwareVersion_H 0x90
+#define HardwareVersion_L 0x00
 
 typedef enum {FALSE = 0, TRUE = !FALSE} bool;
 
@@ -35,6 +40,20 @@ typedef struct
     bool HV1NeedChange;         
     bool HV2NeedChange;
     
+    #if PID_CTRL
+    
+    bool PidOpen;
+    
+    float OldOffSetVpp1;        //偏差
+    float NowOffSetVpp1;
+    uint16_t McuDacVpp1;
+    
+    float OldOffSetVnn1;        //偏差
+    float NowOffSetVnn1;        //偏差
+    uint16_t McuDacVnn1;
+
+    #endif
+
     uint8_t  MinAdjVolCnt;      //微调次数
       
     uint16_t Time;              //调压时间
@@ -122,7 +141,6 @@ typedef struct
     bool            Vpp1Vnn1Dis_Send;
     bool            Vpp2Vnn2En_Send;
     bool            Vpp2Vnn2Dis_Send;
-    
     bool            EcInfo_Send;
     bool            WriteBoardOk_Send;      //写响应
     bool            BoardInfo_Send;         //读响应
@@ -136,8 +154,11 @@ typedef struct
     bool            Bat2_Insert;
     uint8_t         Bat1_Power;             //电池电量
     uint8_t         Bat2_Power;             //电池电量
+    float           Bat1_Tempature;         //电池温度
+    float           Bat2_Tempature;         //电池温度
     uint8_t         Bat1_State;             //电池故障标志
     uint8_t         Bat2_State;             //电池故障标志
+    
 }PwrInfoStruct;
 
 typedef struct

@@ -396,16 +396,10 @@
 #define AUDIO_MUTE_PIN           GPIO_Pin_6
 #define AUDIO_MUTE_EN(x)         x ? GPIO_SetBits(AUDIO_MUTE_PORT, AUDIO_MUTE_PIN) : GPIO_ResetBits(AUDIO_MUTE_PORT, AUDIO_MUTE_PIN)
 
-//TX7516
-#define TX7516_PORT               GPIOG
-#define TX7516_PIN                GPIO_Pin_7
-#define TX7516_EN(x)              x ? GPIO_SetBits(TX7516_PORT, TX7516_PIN) : GPIO_ResetBits(TX7516_PORT, TX7516_PIN)
-
 //C_VNN2_VPP2
 #define C_VPP2_VNN2_PORT          GPIOG
 #define C_VPP2_VNN2_PIN           GPIO_Pin_14
 #define CTL_VPP2_VNN2_EN(x)       x ? GPIO_ResetBits(C_VPP2_VNN2_PORT, C_VPP2_VNN2_PIN) : GPIO_SetBits(C_VPP2_VNN2_PORT, C_VPP2_VNN2_PIN)
-
 
 //C_VNN1_VPP1
 #define C_VPP1_VNN1_PORT          GPIOG

@@ -39,16 +39,38 @@ void PowerOn_Sequence()
     
     CTL_VPP1_VNN1_EN(1);           //上电之后打开高压使能
     CTL_VPP2_VNN2_EN(1);
+    
+    
+    
+    
+    
+//    Adjust_Cw_Reset();   
+//    CTL_VPP1_VNN1_EN(1);                                                        //打开高压输出
+//    CTL_VPP2_VNN2_EN(1);
+//    Adjust_Voltage_Vpp1(4000);                                  //调节VPP1至目标值
+//    Adjust_Voltage_Vpp2(4000);                                  //调节VPP2至目标值
+//    Adjust_Voltage_Vnn1_Vnn2(4000, 4000);       //调节VNN1, VNN2至目标值
+    
+    CTL_VPP1_VNN1_EN(1);                                                        //打开高压输出
+    CTL_VPP2_VNN2_EN(0);
+    Adjust_Voltage_Vpp1(2000);                                  //调节VPP1至目标值   
+    Adjust_Voltage_Vpp2(VPP2_DAC_CLOSE);
+    Adjust_Voltage_Vnn1_Vnn2(2000, VNN2_DAC_CLOSE);  
+    Adjust_Voltage_Pcw_Ncw(375, 375);
+    
+    
+    
 }
 
 void PowerDown_Sequence()
 {
     OS_ERR err;
     
-    TX7516_EN(0);
     PWR_OK_COM(0);
-    OSTimeDly(200, OS_OPT_TIME_DLY, &err);
 
+    
+    
+    OSTimeDly(5, OS_OPT_TIME_DLY, &err);
     AFE_EN2(0);
     EN_FPGA_02(0);
     OSTimeDly(50, OS_OPT_TIME_DLY, &err);
@@ -79,7 +101,7 @@ void PowerDown_Sequence()
     
     SystemStateInit();          
     CTL_VPP1_VNN1_EN(0);        //下电之后关闭高压使能                                                 
-    CTL_VPP2_VNN2_EN(0);   
+    CTL_VPP2_VNN2_EN(0);  
 }
 
 void System_OnCtrl()
@@ -100,7 +122,7 @@ void System_OnCtrl()
         }
         
         if(SysMsg.KeyState == FALSE)
-        {
+        { 
             PWR_BTN_COM(1);
         }
         else
@@ -129,7 +151,6 @@ void System_OnCtrl()
                 cnt = 0;
                 Pwr_OnSequence = FALSE;
                 PWR_OK_COM(1);
-                TX7516_EN(1);
                 SysMsg.SystemState = SYSTEM_ON;
                 USB_CTRL_EN(1);
                 SysMsg.AdjVol.VolInit = TRUE;                                   //开机完成进行高压部分初始化
@@ -142,7 +163,6 @@ void System_OnCtrl()
                     cnt = 0;
                     Pwr_OnSequence = FALSE;
                     PWR_OK_COM(1);
-                    TX7516_EN(1);
                     SysMsg.SystemState = SYSTEM_ON;
                     USB_CTRL_EN(1);                                             //使能USB插入
                     SysMsg.AdjVol.VolInit = TRUE;
@@ -198,6 +218,8 @@ void App_SysOnOff_Task()
     {      
         System_OnCtrl();
         System_OffCtrl();
+        
+
                 
         OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_PERIODIC, &err);
     }

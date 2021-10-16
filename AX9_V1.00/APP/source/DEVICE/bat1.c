@@ -288,73 +288,73 @@ void I2c_Bat1_Stop()
 
 void I2c_Bat1_SendByte(unsigned char data)
 {	
-	SMDAT_BAT1_OUT();
+    SMDAT_BAT1_OUT();
     delay_us_os(5);
-	for(uint8_t mask=0x80; mask!=0; mask>>=1)
-	{
-		if((mask&data) == 0)
-		{
-			BAT1_SMBUS_D_0();
-		}
-		else
-		{
-			BAT1_SMBUS_D_1();
-		}
-		delay_us_os(5);
-		BAT1_SMBUS_C_1();
-		delay_us_os(5);
-		BAT1_SMBUS_C_0();
+    for(uint8_t mask=0x80; mask!=0; mask>>=1)
+    {
+        if((mask&data) == 0)
+        {
+                BAT1_SMBUS_D_0();
+        }
+        else
+        {
+                BAT1_SMBUS_D_1();
+        }
         delay_us_os(5);
-	}
+        BAT1_SMBUS_C_1();
+        delay_us_os(5);
+        BAT1_SMBUS_C_0();
+    delay_us_os(5);
+    }
 }
 
 uint8_t I2c_Bat1_WaitAck()
 {
-	uint16_t startCnt = 2000;
+    uint16_t startCnt = 2000;
 
-	SMDAT_BAT1_IN();
-    
+    SMDAT_BAT1_IN();
+
     delay_us_os(5);
-	while(BAT1_SMBUS_D_READ())
-	{
-		if(--startCnt == 0)
-		{
-			return 1;
-		}
-	}
-	
-	BAT1_SMBUS_C_1();
+    while(BAT1_SMBUS_D_READ())
+    {
+        if(--startCnt == 0)
+        {
+                return 1;
+        }
+    }
+
+    BAT1_SMBUS_C_1();
     delay_us_os(5);
     BAT1_SMBUS_C_0();
     delay_us_os(5);
-	return 0;
+    return 0;
 }
 
 void I2c_Bat1_SendAck()
 {
-	SMDAT_BAT1_OUT();
-    
-	BAT1_SMBUS_C_0();
-	delay_us_os(5);
-	BAT1_SMBUS_D_0();
-	delay_us_os(5);
-	BAT1_SMBUS_C_1();
-	delay_us_os(5);
-	BAT1_SMBUS_C_0();
-	delay_us_os(5);
+    SMDAT_BAT1_OUT();
+
+    BAT1_SMBUS_C_0();
+    delay_us_os(5);
+    BAT1_SMBUS_D_0();
+    delay_us_os(5);
+    BAT1_SMBUS_C_1();
+    delay_us_os(5);
+    BAT1_SMBUS_C_0();
+    delay_us_os(5);
 }
 
 void I2c_Bat1_SendNack()
 {
-	SMDAT_BAT1_OUT();
-	BAT1_SMBUS_C_0();
-	delay_us_os(5);
-	BAT1_SMBUS_D_1();
-	delay_us_os(5);
-	BAT1_SMBUS_C_1();
-	delay_us_os(5);
-	BAT1_SMBUS_C_0();
-	delay_us_os(5);
+    SMDAT_BAT1_OUT();
+    BAT1_SMBUS_C_0();
+    delay_us_os(5);
+    BAT1_SMBUS_D_1();
+    delay_us_os(5);
+    BAT1_SMBUS_C_1();
+    delay_us_os(5);
+    BAT1_SMBUS_C_0();
+    delay_us_os(5);
 }
 
 uint8_t I2c_Bat1_ReadByte()
@@ -440,6 +440,23 @@ void Bat1_PowerRead()
     else
     {
         SysMsg.PwrInfo.Bat1_Power = 0;
+    }
+}
+
+void Bat1_TempatureRead()
+{
+    uint8_t buffer[3] = {0, 0 , 0};
+    
+    if(SysMsg.PwrInfo.Bat1_Insert == TRUE)
+    {
+        if(I2c_Bat1_ReadData(BAT_ADDR, BAT_TMP_CMD, buffer, 3) == TRUE)
+        {
+            SysMsg.PwrInfo.Bat1_Tempature = (int)(((buffer[1] << 8) | buffer[2]) * 0.1) - 273; 
+        }
+    }
+    else
+    {
+        SysMsg.PwrInfo.Bat1_Tempature = 0;
     }
 }
 

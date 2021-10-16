@@ -38,7 +38,7 @@ void App_Usb_Task()
             {
                 SysMsg.Cmd.HV_Send = FALSE;
                 
-                SenFrameCmd.Cid = CMD_ADJUST_HV;
+                SenFrameCmd.Cid = CMD_ADJUSTVOLTAGE_HV;
                 SenFrameCmd.Len = 10;
                 
                 SenFrameCmd.Data[0] = SysMsg.AdjVol.R_VPP1 >> 8;
@@ -63,7 +63,7 @@ void App_Usb_Task()
             {
                 SysMsg.Cmd.CW_Send = FALSE;
                 
-                SenFrameCmd.Cid = CMD_ADJUST_CW;
+                SenFrameCmd.Cid = CMD_ADJUSTVOLTAGE_CW;
                 SenFrameCmd.Len = 10;
                 
                 SenFrameCmd.Data[0] = SysMsg.AdjVol.R_VPP1 >> 8;

@@ -69,7 +69,7 @@ void App_Com_Task()
                 
                 #if DEBUG_COMMAND
                 
-                SenFrameCmd.Cid = CMD_ADJUST_HV;
+                SenFrameCmd.Cid = CMD_ADJUSTVOLTAGE_HV;
                 SenFrameCmd.Len = 10;
                 
                 SenFrameCmd.Data[0] = SysMsg.AdjVol.R_VPP1 >> 8;
@@ -100,7 +100,7 @@ void App_Com_Task()
                 
                 #if DEBUG_COMMAND
                 
-                SenFrameCmd.Cid = CMD_ADJUST_CW;
+                SenFrameCmd.Cid = CMD_ADJUSTVOLTAGE_CW;
                 SenFrameCmd.Len = 10;
                 
                 SenFrameCmd.Data[0] = SysMsg.AdjVol.R_VPP1 >> 8;

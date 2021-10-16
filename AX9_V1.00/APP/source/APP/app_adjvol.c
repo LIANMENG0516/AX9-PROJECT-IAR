@@ -13,7 +13,7 @@ extern Com_Buffer DebugComTX;
 
 void AdjVol_Result_Send()
 {
-    SenFrameCmd.Cid = CMD_ADJUST_HV;
+    SenFrameCmd.Cid = CMD_ADJUSTVOLTAGE_HV;
     SenFrameCmd.Len = 8;
     
     SenFrameCmd.Data[0] = SysMsg.AdjVol.R_VPP1 >> 8;
@@ -119,6 +119,16 @@ uint16_t Step_HvAdjVol_Calcuation(uint16_t Target, uint16_t Precent, u8 DacState
     }
 
     return temp;
+}
+
+
+
+void Pid_AdjVolHv(uint8_t *buffer)
+{
+    SysMsg.AdjVol.T_VPP1 = (buffer[0] << 8) | buffer[1];                                                    //获取目标电压
+    SysMsg.AdjVol.T_VNN1 = (buffer[2] << 8) | buffer[3];
+    SysMsg.AdjVol.T_VPP2 = (buffer[4] << 8) | buffer[5];
+    SysMsg.AdjVol.T_VNN2 = (buffer[6] << 8) | buffer[7];
 }
 
 void Get_AdjHvMsg(uint8_t *buffer)
@@ -337,12 +347,104 @@ void Get_AdjCwMsg(uint8_t *buffer)
     }
 }
 
+
+
 void App_AdjVol_Task()
 {
     OS_ERR err;
+    
+    #if PID_CTRL
+    float kp_vpp1 = 20.0, kd_vpp1 = 10;
+    float kp_vnn1 = 3, kd_vnn1 = 0;
+    #endif
+    
+    float i , j, k;
+    int m = 0;
 
     while(1)
-    {		
+    {	
+      
+        #if PID_CTRL
+      
+        if(SysMsg.AdjVol.PidOpen)
+        {          
+            Adc3_GetAdjVoltage();
+            DEBUG_PRINTF(DEBUG_STRING, "T_VPP1 R_VPP1 McuDacVpp1：%d %d %d\r\n", SysMsg.AdjVol.T_VPP1, SysMsg.AdjVol.R_VPP1, SysMsg.AdjVol.McuDacVpp1);  
+
+            SysMsg.AdjVol.OldOffSetVpp1 = SysMsg.AdjVol.NowOffSetVpp1;
+            SysMsg.AdjVol.NowOffSetVpp1 = (SysMsg.AdjVol.T_VPP1 - SysMsg.AdjVol.R_VPP1) / 100.0;                   //目标减去结果得到偏差
+            
+            
+            i = kp_vpp1 * SysMsg.AdjVol.NowOffSetVpp1;
+            j = kd_vpp1 * (SysMsg.AdjVol.NowOffSetVpp1 - SysMsg.AdjVol.OldOffSetVpp1);            
+            k = i + j;
+            
+            
+            SysMsg.AdjVol.McuDacVpp1 = (uint16_t)(SysMsg.AdjVol.McuDacVpp1 - (i + j));
+
+            DEBUG_PRINTF(DEBUG_STRING, "i j k McuDacVpp1: %f %f %f %d \r\n", i, j, k, SysMsg.AdjVol.McuDacVpp1); 
+
+//            SysMsg.AdjVol.McuDacVpp1 = (uint16_t)(SysMsg.AdjVol.McuDacVpp1 - kp_vpp1 * SysMsg.AdjVol.NowOffSetVpp1) - kd_vpp1 * (SysMsg.AdjVol.NowOffSetVpp1 - SysMsg.AdjVol.OldOffSetVpp1);
+//            DEBUG_PRINTF(DEBUG_STRING, "kp kd McuDacVpp1 %d\r\n", SysMsg.AdjVol.McuDacVpp1); 
+            
+            if(SysMsg.AdjVol.McuDacVpp1 < 450)          //此时VPP1 = 75V
+            {
+                SysMsg.AdjVol.McuDacVpp1 = 450;
+            }
+            
+            if(SysMsg.AdjVol.McuDacVpp1 > 2700)         //此时VPP1 = 0V
+            {
+                SysMsg.AdjVol.McuDacVpp1 = 2700;
+            }
+            
+            DEBUG_PRINTF(DEBUG_STRING, "NowOffSetVpp1 McuDacVpp1：%f %d \r\n", SysMsg.AdjVol.NowOffSetVpp1, SysMsg.AdjVol.McuDacVpp1);  
+          
+            DAC_SetChannel1Data(DAC_Align_12b_R, SysMsg.AdjVol.McuDacVpp1);                                  //调节VPP1至目标值
+            DAC_SoftwareTriggerCmd(DAC_Channel_1, ENABLE);                                      //软件触发DAC转换
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            Adc3_GetAdjVoltage();
+      //      DEBUG_PRINTF(DEBUG_STRING, "T_VNN1 R_VNN1：%d %d \r\n", SysMsg.AdjVol.T_VNN1, SysMsg.AdjVol.R_VNN1);
+            
+            SysMsg.AdjVol.OldOffSetVnn1 = SysMsg.AdjVol.NowOffSetVnn1;
+            SysMsg.AdjVol.NowOffSetVnn1 = (SysMsg.AdjVol.T_VNN1 - SysMsg.AdjVol.R_VNN1) / 100.0;                   //目标减去结果得到偏差
+            SysMsg.AdjVol.McuDacVnn1 = SysMsg.AdjVol.McuDacVnn1 - ((int16_t)(kp_vnn1 * SysMsg.AdjVol.NowOffSetVnn1) + (int16_t)(kd_vnn1 * (SysMsg.AdjVol.NowOffSetVnn1 - SysMsg.AdjVol.OldOffSetVnn1)));;
+            
+            if(SysMsg.AdjVol.McuDacVnn1 < 45)          //此时VNN1 = 75V
+            {
+                SysMsg.AdjVol.McuDacVnn1 = 45;
+            }
+            
+            if(SysMsg.AdjVol.McuDacVnn1 > 255)         //此时VNN1 = 0V
+            {
+                SysMsg.AdjVol.McuDacVnn1 = 255;
+            }
+            
+       //     DEBUG_PRINTF(DEBUG_STRING, "NowOffSetVnn1 McuDacVnn1：%f %d \r\n", SysMsg.AdjVol.NowOffSetVnn1, SysMsg.AdjVol.McuDacVnn1);
+            
+            DacHv_Tlv5626cd_ValueSet(SysMsg.AdjVol.McuDacVnn1, SysMsg.AdjVol.P_SpiDacHv2);                                 //触发VNN1转换  
+        }
+      
+        
+        
+        
+        
+        
+        
+        
+        
+      
+        #else
+        
         if(SysMsg.AdjVol.MinAdjVolOpen)                                       
         {
             if(++SysMsg.AdjVol.MinAdjVolCnt >= 6)
@@ -362,12 +464,12 @@ void App_AdjVol_Task()
                     
                     if(DesVol > 0)
                     {
-                        Adjust_Voltage_Vpp1(SysMsg.AdjVol.T_VPP1 - DesVol);
+                        Adjust_Voltage_Vpp1(SysMsg.AdjVol.T_VPP1 - abs(DesVol));
                     }
                     
                     if(DesVol < 0)
                     {
-                        Adjust_Voltage_Vpp1(SysMsg.AdjVol.T_VPP1 + DesVol);
+                        Adjust_Voltage_Vpp1(SysMsg.AdjVol.T_VPP1 + abs(DesVol));
                     }
                 }
                 
@@ -379,11 +481,11 @@ void App_AdjVol_Task()
                     
                     if(DesVol > 0)
                     {
-                        Adjust_Voltage_Vnn1_Vnn2(SysMsg.AdjVol.T_VNN1  - DesVol, SysMsg.AdjVol.T_VNN2);
+                        Adjust_Voltage_Vnn1_Vnn2(SysMsg.AdjVol.T_VNN1 - abs(DesVol), SysMsg.AdjVol.T_VNN2);
                     }
                     if(DesVol < 0)
                     {
-                        Adjust_Voltage_Vnn1_Vnn2(SysMsg.AdjVol.T_VNN1  + DesVol, SysMsg.AdjVol.T_VNN2);
+                        Adjust_Voltage_Vnn1_Vnn2(SysMsg.AdjVol.T_VNN1 + abs(DesVol), SysMsg.AdjVol.T_VNN2);
                     }
                 }
                 
@@ -397,12 +499,12 @@ void App_AdjVol_Task()
                         
                         if(DesVol > 0)
                         {
-                            Adjust_Voltage_Vpp2(SysMsg.AdjVol.T_VPP2 - DesVol);
+                            Adjust_Voltage_Vpp2(SysMsg.AdjVol.T_VPP2 - abs(DesVol));
                         }
                         
                         if(DesVol < 0)
                         {
-                            Adjust_Voltage_Vpp2(SysMsg.AdjVol.T_VPP2 + DesVol);
+                            Adjust_Voltage_Vpp2(SysMsg.AdjVol.T_VPP2 + abs(DesVol));
                         }
                     }
 
@@ -414,11 +516,11 @@ void App_AdjVol_Task()
                         
                         if(DesVol > 0)
                         {
-                            Adjust_Voltage_Vnn1_Vnn2(SysMsg.AdjVol.T_VNN1, SysMsg.AdjVol.T_VNN2 - DesVol);
+                            Adjust_Voltage_Vnn1_Vnn2(SysMsg.AdjVol.T_VNN1, SysMsg.AdjVol.T_VNN2 - abs(DesVol));
                         }
                         if(DesVol < 0)
                         {
-                            Adjust_Voltage_Vnn1_Vnn2(SysMsg.AdjVol.T_VNN1, SysMsg.AdjVol.T_VNN2 + DesVol);
+                            Adjust_Voltage_Vnn1_Vnn2(SysMsg.AdjVol.T_VNN1, SysMsg.AdjVol.T_VNN2 + abs(DesVol));
                         }
                     }
                 }
@@ -433,12 +535,12 @@ void App_AdjVol_Task()
                         
                         if(DesVol > 0)
                         {
-                            Adjust_Voltage_Pcw_Ncw(SysMsg.AdjVol.T_VPP2 - DesVol, SysMsg.AdjVol.T_VNN2);
+                            Adjust_Voltage_Pcw_Ncw(SysMsg.AdjVol.T_VPP2 - abs(DesVol), SysMsg.AdjVol.T_VNN2);
                         }
                         
                         if(DesVol < 0)
                         {
-                             Adjust_Voltage_Pcw_Ncw(SysMsg.AdjVol.T_VPP2 + DesVol, SysMsg.AdjVol.T_VNN2);
+                             Adjust_Voltage_Pcw_Ncw(SysMsg.AdjVol.T_VPP2 + abs(DesVol), SysMsg.AdjVol.T_VNN2);
                         }
                     }
                     
@@ -450,11 +552,11 @@ void App_AdjVol_Task()
                         
                         if(DesVol > 0)
                         {
-                            Adjust_Voltage_Pcw_Ncw(SysMsg.AdjVol.T_VPP2, SysMsg.AdjVol.T_VNN2 - DesVol);
+                            Adjust_Voltage_Pcw_Ncw(SysMsg.AdjVol.T_VPP2, SysMsg.AdjVol.T_VNN2 - abs(DesVol));
                         }
                         if(DesVol < 0)
                         {
-                            Adjust_Voltage_Pcw_Ncw(SysMsg.AdjVol.T_VPP2, SysMsg.AdjVol.T_VNN2 + DesVol);
+                            Adjust_Voltage_Pcw_Ncw(SysMsg.AdjVol.T_VPP2, SysMsg.AdjVol.T_VNN2 + abs(DesVol));
                         }
                     }
                 }
@@ -549,6 +651,8 @@ void App_AdjVol_Task()
                           
             }
         }
+        
+#endif
         
         OSTimeDlyHMSM(0, 0, 0, 5, OS_OPT_TIME_PERIODIC, &err);
     }

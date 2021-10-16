@@ -144,4 +144,52 @@
         <path>C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR\AX9_V1.00\APP\source\DEVICE\tmp468.c</path>
         <encoding>System</encoding>
     </override>
+    <override>
+        <path>C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR-PID\AX9_V1.00\APP\source\APP\app_adjvol.c</path>
+        <encoding>System</encoding>
+    </override>
+    <override>
+        <path>C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR-PID\AX9_V1.00\APP\source\APP\app_adjvol.h</path>
+        <encoding>System</encoding>
+    </override>
+    <override>
+        <path>C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR-PID\AX9_V1.00\APP\source\APP\app_com.c</path>
+        <encoding>System</encoding>
+    </override>
+    <override>
+        <path>C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR-PID\AX9_V1.00\APP\source\APP\app_sysonoff.c</path>
+        <encoding>System</encoding>
+    </override>
+    <override>
+        <path>C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR-PID\AX9_V1.00\APP\source\BSP\board.c</path>
+        <encoding>System</encoding>
+    </override>
+    <override>
+        <path>C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR-PID\AX9_V1.00\APP\source\BSP\gpio.c</path>
+        <encoding>System</encoding>
+    </override>
+    <override>
+        <path>C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR-PID\AX9_V1.00\APP\source\BSP\systick.c</path>
+        <encoding>System</encoding>
+    </override>
+    <override>
+        <path>C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR-PID\AX9_V1.00\APP\source\DEVICE\adjustvoltage.c</path>
+        <encoding>System</encoding>
+    </override>
+    <override>
+        <path>C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR-PID\AX9_V1.00\APP\source\DEVICE\power.c</path>
+        <encoding>System</encoding>
+    </override>
+    <override>
+        <path>C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR-PID\AX9_V1.00\APP\source\DEVICE\power.h</path>
+        <encoding>System</encoding>
+    </override>
+    <override>
+        <path>C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR-PID\AX9_V1.00\APP\source\DEVICE\system.h</path>
+        <encoding>System</encoding>
+    </override>
+    <override>
+        <path>C:\Users\LIANMENG\Desktop\AX9-PROJECT-IAR-PID\AX9_V1.00\APP\source\DEVICE\tmp468.c</path>
+        <encoding>System</encoding>
+    </override>
 </userOverrides>

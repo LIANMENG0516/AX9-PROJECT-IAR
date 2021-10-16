@@ -8,7 +8,7 @@ void cb_Sys_StateChk_Tmr(void *p_tmr, void *p_arg)
 
     Adc3_GetFixVoltage();
     
-    Adc3_GetAdjVoltage();
+//    Adc3_GetAdjVoltage();
 }
 
 

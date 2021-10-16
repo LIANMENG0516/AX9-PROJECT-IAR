@@ -7,6 +7,8 @@
 #define RNAGE_MIN_VOL 50                //调压结果与调压目标的差值小于此值时不进行微调 0.5V
 #define SWITCH_ADJVOL_MODULE     0      //1：分步调压, 0：一次性调压
 
+
+
 #define HV_CHANGE_UP_TIMEOUT   100
 #define HV_CHANGE_DOWN_TIMEOUT 200
 
@@ -24,5 +26,7 @@ void App_AdjVol_TaskCreate(void);
 
 void Get_AdjHvMsg(uint8_t *buffer);
 void Get_AdjCwMsg(uint8_t *buffer);
+
+void Pid_AdjVolHv(uint8_t *buffer);
 
 #endif

@@ -15,7 +15,21 @@ System_MsgStruct SysMsg = {
     .AdjVol.TimeFlag                    = FALSE,
     
     .AdjVol.HV1NeedChange               = FALSE,
-    .AdjVol.HV2NeedChange               = FALSE,        
+    .AdjVol.HV2NeedChange               = FALSE,    
+
+    #if PID_CTRL
+    
+    .AdjVol.PidOpen                     = FALSE,
+    
+    .AdjVol.OldOffSetVpp1               = 0.0, 
+    .AdjVol.NowOffSetVpp1               = 0.0,
+    .AdjVol.McuDacVpp1                  = VPP1_DAC_CLOSE,
+    
+    .AdjVol.OldOffSetVnn1               = 0.0, 
+    .AdjVol.NowOffSetVnn1               = 0.0,    
+    .AdjVol.McuDacVnn1                  = VNN1_DAC_CLOSE,
+    
+    #endif    
     
     .AdjVol.MinAdjVolCnt                = 0,
     .AdjVol.Time                        = 0,
@@ -96,6 +110,8 @@ System_MsgStruct SysMsg = {
     .PwrInfo.Bat2_Insert                = FALSE,
     .PwrInfo.Bat1_Power                 = 0,
     .PwrInfo.Bat2_Power                 = 0,
+    .PwrInfo.Bat1_Tempature             = 0,
+    .PwrInfo.Bat2_Tempature             = 0,
     .PwrInfo.Bat1_State                 = BAT_STATE_ERROR,
     .PwrInfo.Bat2_State                 = BAT_STATE_ERROR,
     .PwrInfo.Ac_Insert                  = FALSE,
@@ -124,7 +140,22 @@ void SystemStateInit()
     SysMsg.AdjVol.TimeFlag              = FALSE,
     
     SysMsg.AdjVol.HV1NeedChange         = FALSE,
-    SysMsg.AdjVol.HV2NeedChange         = FALSE,        
+    SysMsg.AdjVol.HV2NeedChange         = FALSE,
+    
+    #if PID_CTRL
+    
+    SysMsg.AdjVol.PidOpen               = FALSE,
+    
+    SysMsg.AdjVol.OldOffSetVpp1         = 0.0, 
+    SysMsg.AdjVol.NowOffSetVpp1         = 0.0,
+    SysMsg.AdjVol.McuDacVpp1            = VPP1_DAC_CLOSE,
+           
+    SysMsg.AdjVol.OldOffSetVnn1         = 0.0, 
+    SysMsg.AdjVol.NowOffSetVnn1         = 0.0,
+    SysMsg.AdjVol.McuDacVnn1            = VNN1_DAC_CLOSE,
+    
+    
+    #endif 
     
     SysMsg.AdjVol.MinAdjVolCnt          = 0,
     SysMsg.AdjVol.Time                  = 0,
@@ -204,6 +235,8 @@ void SystemStateInit()
     SysMsg.PwrInfo.Bat2_Insert          = FALSE;
     SysMsg.PwrInfo.Bat1_Power           = 0;
     SysMsg.PwrInfo.Bat2_Power           = 0;
+    SysMsg.PwrInfo.Bat1_Tempature       = 0.0;
+    SysMsg.PwrInfo.Bat2_Tempature       = 0.0;
     SysMsg.PwrInfo.Bat1_State           = BAT_STATE_ERROR;
     SysMsg.PwrInfo.Bat2_State           = BAT_STATE_ERROR;
     
@@ -305,25 +338,3 @@ bool System_S4_State_Minitor()
     }
     return s4StateChanged; 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
